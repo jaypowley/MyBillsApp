@@ -1,0 +1,60 @@
+﻿@model MyBills.Domain.Entities.Bill
+
+@{
+    ViewBag.Title = "Delete Bill";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete Bill</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <hr />
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.Name)
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.Amount, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DisplayFor(model => model.Amount)
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.IsComplete, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <div class="checkbox">
+                @Html.DisplayFor(model => model.IsComplete)
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        @Html.LabelFor(model => model.IsAutoPaid, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <div class="checkbox">
+                @Html.DisplayFor(model => model.IsAutoPaid)
+            </div>
+        </div>
+    </div>
+
+    <form asp-controller="Bills" asp-action="Delete" method="post">
+        <div>
+            <input type="submit" value="Delete" class="btn btn-danger" /> |
+            @Html.ActionLink("Back to List", "Index")
+        </div>
+    </form>
+</div>
+
+@section SiteScripts {
+    @{
+        await Html.RenderPartialAsync("_JsLibsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_JsSitePartial");
+    }
+}

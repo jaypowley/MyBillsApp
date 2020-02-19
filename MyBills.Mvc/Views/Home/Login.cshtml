@@ -1,0 +1,36 @@
+﻿@model MyBills.Domain.Entities.UserLogin
+@{
+    ViewBag.Title = "Bills Login";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<div class="content">
+    @using (Html.BeginForm("Login", "Home", FormMethod.Post))
+    {
+
+        <h6>My Bills Login</h6>
+        @Html.TextBoxFor(u => u.Username, null, new { placeholder = "E-mail address", @class = "form-control" })
+        @Html.TextBoxFor(u => u.Password, null, new { placeholder = "Password", @class = "form-control", type = "Password" })
+
+        if (ViewBag.ErrorMessage != null)
+        {
+            <div class="send-error">
+                <p>@ViewBag.ErrorMessage</p>
+            </div>
+        }
+
+        <div class="action">
+            <input id="btnLogin" type="submit" value="Login" class="btn btn-primary signup" /> or
+
+            @Html.ActionLink("Register", "Register", "Home")
+        </div>
+    }
+
+</div>
+@section LoginScripts {
+    @{
+        await Html.RenderPartialAsync("_JsLibsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_JsLoginPartial");
+    }
+}

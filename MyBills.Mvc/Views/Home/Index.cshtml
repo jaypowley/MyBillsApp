@@ -1,0 +1,102 @@
+﻿@model MyBills.Mvc.Models.UserBillsViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>Bills for @ViewBag.MonthName @Model.UserMonthlyBillSet.Year</h2>
+        <div class="pull-right">
+            <ul class="pagination">
+                <li class="page-item">
+                    @Html.ActionLink("<< Previous", "Index", "Home", new { month = ViewBag.PreviousMonth, year = ViewBag.PreviousMonthsYear }, new { @class = "page-link", title = (string)ViewBag.PreviousMonthName })
+                </li>
+                <li class="page-item">
+                    @Html.ActionLink("Next >>", "Index", "Home", new { month = ViewBag.NextMonth, year = ViewBag.NextMonthsYear }, new { @class = "page-link", title = (string)ViewBag.NextMonthName })
+                </li>
+            </ul>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-center">Due Date</th>
+                    <th class="text-center">Is Auto Paid?</th>
+                    <th>Is Paid?</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var count = 1;
+                    foreach (var bill in Model.UserMonthlyBillSet.UserBills)
+                    {
+
+                        var parms = new Dictionary<string, string>
+                                    {
+                                { "billId", bill.BillId.ToString() },
+                                { "day", bill.Day.ToString() },
+                                { "month", Model.UserMonthlyBillSet.Month.ToString() },
+                                { "year", Model.UserMonthlyBillSet.Year.ToString() }
+                            };
+
+
+                        <tr>
+                            <td>@count</td>
+                            <td>@bill.Bill.Name</td>
+                            <td class="text-right">$@bill.Bill.Amount</td>
+                            <td class="text-center">@bill.Day</td>
+
+                            @if (bill.Bill.IsAutoPaid)
+                            {
+                                <td class="text-center"><span class="fa fa-check"></span></td>
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+
+                            @if (bill.IsPaid)
+                            {
+                                <td>
+                                    <a asp-action="PayBill"
+                                       asp-all-route-data="parms" 
+                                       title="Paid"><i class="fas fa-check text-success no-under"></i></a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <a asp-action="PayBill"
+                                       asp-all-route-data="parms"
+                                       title="Not Paid"><i class="fas fa-times text-danger no-under"></i></a>
+                                </td>
+                            }
+                        </tr>
+                        count++;
+                    }
+                }
+            </tbody>
+        </table>
+
+        @{
+            if (Model.UserMonthlyBillSet.UserBills.Count == 0)
+            {
+                <p class="text-center">You do not have any bills entered. Please go to the <a asp-action="Create" asp-controller="Bills">Create New Bill</a> page to enter your bills.</p>
+            }
+        }
+        <div class="pull-right">
+            <span>$@Model.UserMonthlyBillSet.RemainingBalance Left to pay this month</span>
+        </div>
+    </div>
+</div>
+@section SiteScripts {
+    @{
+        await Html.RenderPartialAsync("_JsLibsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_JsSitePartial");
+    }
+}

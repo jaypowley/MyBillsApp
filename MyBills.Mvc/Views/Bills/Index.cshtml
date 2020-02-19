@@ -1,0 +1,76 @@
+﻿@model MyBills.Mvc.Models.UserBillsViewModel
+
+@{
+    ViewBag.Title = "My Bills";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>My Bills</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table table-striped">
+    <tr>
+        <th>#</th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserBillSet.BillDetails.FirstOrDefault().BillName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserBillSet.BillDetails.FirstOrDefault().Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserBillSet.BillDetails.FirstOrDefault().RecurrenceTypeName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserBillSet.BillDetails.FirstOrDefault().IsComplete)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserBillSet.BillDetails.FirstOrDefault().IsAutoPaid)
+        </th>
+        <th></th>
+    </tr>
+
+    @{
+        var count = 1;
+        foreach (var item in Model.UserBillSet.BillDetails)
+        {
+            <tr>
+                <td>@count</td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BillName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Amount)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RecurrenceTypeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsComplete)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.IsAutoPaid)
+                </td>
+                <td>
+                    @Html.ActionLink("Edit", "Edit", new { id = item.BillId }) |
+                    @Html.ActionLink("Delete", "Delete", new { id = item.BillId })
+                </td>
+            </tr>
+            count++;
+        }
+    }
+</table>
+
+@if (Model.UserBillSet.BillDetails.Count == 0)
+{
+    <p class="text-center">You do not have any bills entered. Please go to the <a asp-action="Create" asp-controller="Bills">Create New Bill</a> page to enter your bills.</p>
+}
+
+@section SiteScripts {
+    @{
+        await Html.RenderPartialAsync("_JsLibsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_JsSitePartial");
+    }
+}

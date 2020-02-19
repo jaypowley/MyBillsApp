@@ -1,0 +1,14 @@
+﻿@model MyBills.Domain.Entities.BillViewModel
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        @Html.LabelFor(model => model.BiMonthlyRecurrence.FirstDueDate)
+        @Html.EditorFor(model => model.BiMonthlyRecurrence.FirstDueDate, new { htmlAttributes = new { placeholder = "1st Due Date" } })
+        @Html.ValidationMessageFor(model => model.BiMonthlyRecurrence.FirstDueDate, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group col-md-6">
+        @Html.LabelFor(model => model.BiMonthlyRecurrence.SecondDueDate)
+        @Html.EditorFor(model => model.BiMonthlyRecurrence.SecondDueDate, new { htmlAttributes = new { placeholder = "2nd Due Date" } })
+        @Html.ValidationMessageFor(model => model.BiMonthlyRecurrence.SecondDueDate, "", new { @class = "text-danger" })
+    </div>
+</div>

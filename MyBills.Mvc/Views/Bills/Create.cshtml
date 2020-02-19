@@ -1,0 +1,286 @@
+﻿@model MyBills.Domain.Entities.BillViewModel
+
+@{
+    ViewBag.Title = "Create New Bill";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var daySelectListItems = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Monday", Value = "Monday" },
+        new SelectListItem { Text = "Tuesday", Value = "Tuesday" },
+        new SelectListItem { Text = "Wednesday", Value = "Wednesday" },
+        new SelectListItem { Text = "Thursday", Value = "Thursday" },
+        new SelectListItem { Text = "Friday", Value = "Friday" },
+        new SelectListItem { Text = "Saturday", Value = "Saturday" },
+        new SelectListItem { Text = "Sunday", Value = "Sunday" }
+    };
+
+    var monthSelectListItems = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "January", Value = "1" },
+        new SelectListItem { Text = "February", Value = "2" },
+        new SelectListItem { Text = "March", Value = "3" },
+        new SelectListItem { Text = "April", Value = "4" },
+        new SelectListItem { Text = "May", Value = "5" },
+        new SelectListItem { Text = "June", Value = "6" },
+        new SelectListItem { Text = "July", Value = "7" },
+        new SelectListItem { Text = "August", Value = "8" },
+        new SelectListItem { Text = "September", Value = "9" },
+        new SelectListItem { Text = "October", Value = "10" },
+        new SelectListItem { Text = "November", Value = "11" },
+        new SelectListItem { Text = "December", Value = "12" }
+    };
+}
+
+<h2>Create New Bill</h2>
+
+<hr />
+
+<form asp-controller="Bills" asp-action="Create" method="post">
+    <div class="form-group row">
+        <label asp-for="Bill.Name" class="col-form-label col-md-2"></label>
+        <div class="col-md-10">
+            <input type="text" asp-for="Bill.Name" class="form-control">
+            <span asp-validation-for="Bill.Name" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="RecurrenceTypeId" class="col-form-label col-md-2"></label>
+        <div class="col-md-10">
+            @Html.DropDownListFor(m => m.RecurrenceTypeId,
+                new SelectList(Model.RecurrenceTypeList, "Id", "Name"),
+                new { id = "RecurrenceType", @class = "form-control" })
+            <span asp-validation-for="RecurrenceTypeId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-2">
+            Recurrence Schedule
+        </div>
+        <div class="col-md-10">
+            <div id="recTypeSchedule">
+                <div id="daily-rec">
+                    <div class="form-group">
+                        <p>This bill will recur every day.</p>
+                    </div>
+                </div>
+
+                <div id="biMonthly-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label asp-for="BiMonthlyRecurrence.FirstDueDate"></label>
+                            @Html.EditorFor(m => m.BiMonthlyRecurrence.FirstDueDate,
+                                new { htmlAttributes = new { placeholder = "1st Due Date", @class = "form-control" } })
+                            <span asp-validation-for="BiMonthlyRecurrence.FirstDueDate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label asp-for="BiMonthlyRecurrence.SecondDueDate"></label>
+                            @Html.EditorFor(m => m.BiMonthlyRecurrence.SecondDueDate,
+                                new { htmlAttributes = new { placeholder = "2nd Due Date", @class = "form-control" } })
+                            <span asp-validation-for="BiMonthlyRecurrence.SecondDueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="biWeeklyEven-rec" style="display: none;">
+                    <div class="form-group">
+                        <label asp-for="BiWeeklyEvenRecurrence.DayOfTheWeek"></label>
+
+                        @Html.DropDownListFor(
+                            m => m.BiWeeklyEvenRecurrence.DayOfTheWeek, daySelectListItems,
+                            new { @class = "form-control" })
+
+                        <span asp-validation-for="BiWeeklyEvenRecurrence.DayOfTheWeek" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div id="biWeeklyOdd-rec" style="display: none;">
+                    <div class="form-group">
+                        <label asp-for="BiWeeklyOddRecurrence.DayOfTheWeek"></label>
+
+                        @Html.DropDownListFor(
+                            m => m.BiWeeklyOddRecurrence.DayOfTheWeek, daySelectListItems,
+                            new { @class = "form-control" })
+
+                        <span asp-validation-for="BiWeeklyOddRecurrence.DayOfTheWeek" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div id="weekly-rec" style="display: none;">
+                    <div class="form-group">
+                        <label asp-for="WeeklyRecurrence.DayOfTheWeek"></label>
+
+                        @Html.DropDownListFor(
+                            m => m.WeeklyRecurrence.DayOfTheWeek, daySelectListItems,
+                            new { @class = "form-control" })
+
+                        <span asp-validation-for="WeeklyRecurrence.DayOfTheWeek" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div id="biYearly-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label asp-for="BiYearlyRecurrence.FirstMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.BiYearlyRecurrence.FirstMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="BiYearlyRecurrence.FirstMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="BiYearlyRecurrence.FirstDay"></label>
+                            @Html.EditorFor(m => m.BiYearlyRecurrence.FirstDay,
+                                new { htmlAttributes = new { placeholder = "1st Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="BiYearlyRecurrence.FirstDay" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="BiYearlyRecurrence.SecondMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.BiYearlyRecurrence.SecondMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="BiYearlyRecurrence.SecondMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="BiYearlyRecurrence.SecondDay"></label>
+                            @Html.EditorFor(m => m.BiYearlyRecurrence.SecondDay,
+                                new { htmlAttributes = new { placeholder = "2nd Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="BiYearlyRecurrence.SecondDay" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="monthly-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label asp-for="MonthlyRecurrence.DueDate"></label>
+                            @Html.EditorFor(m => m.MonthlyRecurrence.DueDate,
+                                new { htmlAttributes = new { placeholder = "Bill Due Date", @class = "form-control" } })
+                            <span asp-validation-for="MonthlyRecurrence.DueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="oneTime-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label asp-for="OnetimeRecurrence.DueDate"></label>
+                            @Html.EditorFor(m => m.OnetimeRecurrence.DueDate,
+                                new { htmlAttributes = new { placeholder = "Bill Due Date", type = "Date", @class = "form-control" } })
+                            <span asp-validation-for="OnetimeRecurrence.DueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="quarterly-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.FirstMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.QuarterlyRecurrence.FirstMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="QuarterlyRecurrence.FirstMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.FirstDay"></label>
+                            @Html.EditorFor(m => m.QuarterlyRecurrence.FirstDay,
+                                new { htmlAttributes = new { placeholder = "1st Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="QuarterlyRecurrence.FirstDay" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.SecondMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.QuarterlyRecurrence.SecondMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="QuarterlyRecurrence.SecondMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.SecondDay"></label>
+                            @Html.EditorFor(m => m.QuarterlyRecurrence.SecondDay,
+                                new { htmlAttributes = new { placeholder = "2nd Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="QuarterlyRecurrence.SecondDay" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.ThirdMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.QuarterlyRecurrence.ThirdMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="QuarterlyRecurrence.ThirdMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.ThirdDay"></label>
+                            @Html.EditorFor(m => m.QuarterlyRecurrence.ThirdDay,
+                                new { htmlAttributes = new { placeholder = "3rd Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="QuarterlyRecurrence.ThirdDay" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.FourthMonth"></label>
+                            @Html.DropDownListFor(
+                                m => m.QuarterlyRecurrence.FourthMonth, monthSelectListItems,
+                                new { @class = "form-control" })
+                            <span asp-validation-for="QuarterlyRecurrence.FourthMonth" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label asp-for="QuarterlyRecurrence.FourthDay"></label>
+                            @Html.EditorFor(m => m.QuarterlyRecurrence.FourthDay,
+                                new { htmlAttributes = new { placeholder = "4th Due Date Day", @class = "form-control" } })
+                            <span asp-validation-for="QuarterlyRecurrence.FourthDay" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="yearly-rec" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label asp-for="YearlyRecurrence.DueDate"></label>
+                            @Html.EditorFor(m => m.YearlyRecurrence.DueDate,
+                                new { htmlAttributes = new { placeholder = "Bill Due Date", type = "Date", @class = "form-control" } })
+                            <span asp-validation-for="YearlyRecurrence.DueDate" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Bill.Amount" class="col-form-label col-md-2"></label>
+        <div class="col-md-10">
+            @Html.EditorFor(m => m.Bill.Amount,
+                new { htmlAttributes = new { @class = "form-control" } })
+            <span asp-validation-for="Bill.Amount" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label asp-for="Bill.IsAutoPaid" class="col-form-label col-md-2"></label>
+        <div class="col-md-10">
+            @Html.EditorFor(m => m.Bill.IsAutoPaid)
+            <span asp-validation-for="Bill.IsAutoPaid" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="offset-md-2 col-md-10">
+            <input type="submit" value="Create" class="btn btn-primary" /> or <a asp-action="Index">Back to List</a>
+        </div>
+    </div>
+
+</form>
+
+@if (ViewBag.ErrorMessage != string.Empty)
+{
+    <div>
+        <p class="text-danger">@ViewBag.ErrorMessage</p>
+    </div>
+}
+
+@section SiteScripts {
+    @{
+        await Html.RenderPartialAsync("_JsLibsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_JsSitePartial");
+    }
+}
