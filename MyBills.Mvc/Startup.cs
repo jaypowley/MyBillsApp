@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -27,7 +28,12 @@ namespace MyBills.Mvc
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(o => o.LoginPath = new PathString("/home/login"));
+                .AddCookie(o =>
+                {
+                    o.LoginPath = new PathString("/home/login");
+                    o.LogoutPath = new PathString("/home/logout");
+                }
+            );
 
             BuildAppSettingsProvider();
         }
@@ -55,7 +61,7 @@ namespace MyBills.Mvc
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
