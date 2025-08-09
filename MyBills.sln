@@ -15,6 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyBills.Services", "MyBills
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "MyBills.Dacpac", "MyBills.Dacpac\MyBills.Dacpac.sqlproj", "{E3D2D94B-6EC2-465A-BAF4-D6B381F9B83A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Publish", "Publish", "{E8B3F341-9FE8-457C-B90E-61BB0CB31F68}"
+	ProjectSection(SolutionItems) = preProject
+		MyBills.PublishSettings = MyBills.PublishSettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

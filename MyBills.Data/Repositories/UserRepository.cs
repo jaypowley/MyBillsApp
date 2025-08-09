@@ -144,7 +144,7 @@ namespace MyBills.Data.Repositories
             User user;
             await using (var ctx = new MyBillsContext())
             {
-                user = await ctx.Users.SingleAsync(x => x.Username == username);
+                user = await ctx.Users.SingleOrDefaultAsync(x => x.Username == username);
             }
             return user;
         }
