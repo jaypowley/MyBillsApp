@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MyBills.Core;
 using MyBills.Data.Configurations;
-using MyBills.Data.Providers;
 using MyBills.Domain.Entities;
 
 namespace MyBills.Data.Contexts
@@ -19,12 +17,7 @@ namespace MyBills.Data.Contexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // A custom provider to log generated SQL calls from Entity Framework to the database
-            var lf = new LoggerFactory();
-            lf.AddProvider(new EfLogProvider());
-            optionsBuilder
-                .UseLoggerFactory(lf)
-                .UseSqlServer(AppSettings.ConnectionString);
+
         }
 
         public DbSet<User> Users { get; set; }
