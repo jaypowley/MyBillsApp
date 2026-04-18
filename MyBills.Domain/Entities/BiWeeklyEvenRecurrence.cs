@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -12,7 +12,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "BiWeeklyEven";
 
-        public string Format => JsonConvert.SerializeObject(new { type = Name, dayOfTheWeek = DayOfTheWeek });
+        public string Format => JsonSerializer.Serialize(new { type = Name, dayOfTheWeek = DayOfTheWeek });
 
         public BiWeeklyEvenRecurrence()
         {
@@ -21,7 +21,7 @@ namespace MyBills.Domain.Entities
 
         public BiWeeklyEvenRecurrence(string schedule)
         {
-            var outObject = JsonConvert.DeserializeObject<BiWeeklyEvenRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<BiWeeklyEvenRecurrence>(schedule);
             DayOfTheWeek = outObject.DayOfTheWeek;
         }
     }

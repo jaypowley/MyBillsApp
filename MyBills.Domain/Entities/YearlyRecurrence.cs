@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -12,7 +12,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "Yearly";
 
-        public string Format => JsonConvert.SerializeObject(new { type = Name, dueDate = DueDate });
+        public string Format => JsonSerializer.Serialize(new { type = Name, dueDate = DueDate });
 
         public YearlyRecurrence()
         {
@@ -21,7 +21,7 @@ namespace MyBills.Domain.Entities
 
         public YearlyRecurrence(string schedule)
         {
-            var outObject = JsonConvert.DeserializeObject<YearlyRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<YearlyRecurrence>(schedule);
             DueDate = outObject.DueDate;
         }
     }

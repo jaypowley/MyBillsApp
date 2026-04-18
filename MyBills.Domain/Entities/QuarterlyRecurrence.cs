@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -34,7 +34,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "Quarterly";
 
-        public string Format => JsonConvert.SerializeObject(new
+        public string Format => JsonSerializer.Serialize(new
         {
             type = Name,
             firstMonth = FirstMonth,
@@ -59,7 +59,7 @@ namespace MyBills.Domain.Entities
                 throw new NullReferenceException();
             }
 
-            var outObject = JsonConvert.DeserializeObject<QuarterlyRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<QuarterlyRecurrence>(schedule);
             FirstMonth = outObject.FirstMonth;
             FirstDay = outObject.FirstDay;
             SecondMonth = outObject.SecondMonth;
