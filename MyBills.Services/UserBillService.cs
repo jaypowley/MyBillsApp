@@ -1,15 +1,14 @@
-﻿using System;
+﻿using MyBills.Core;
+using MyBills.Domain.Entities;
+using MyBills.Domain.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MyBills.Core;
-using MyBills.Data.Repositories;
-using MyBills.Domain.Entities;
-using MyBills.Domain.Interfaces;
 
 namespace MyBills.Services
 {
-    public class UserBillService
+    public class UserBillService: IUserBillService
     {
         private readonly ILogRepository _logRepository;
         private readonly IBillRepository _billRepository;
@@ -20,13 +19,13 @@ namespace MyBills.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="UserBillService"/> class.
         /// </summary>
-        public UserBillService()
+        public UserBillService(ILogRepository logRepository, IBillRepository billRepository, IUserBillRepository userBillRepository, IRecurrenceTypeRepository recurrenceTypeRepository, IUserBillRecurrenceScheduleRepository userBillRecurrenceScheduleRepository)
         {
-            _logRepository = new LogRepository();
-            _billRepository = new BillRepository();
-            _userBillRepository = new UserBillRepository();
-            _recurrenceTypeRepository = new RecurrenceTypeRepository();
-            _userBillRecurrenceScheduleRepository = new UserBillRecurrenceScheduleRepository();
+            _logRepository = logRepository;
+            _billRepository = billRepository;
+            _userBillRepository = userBillRepository;
+            _recurrenceTypeRepository = recurrenceTypeRepository;
+            _userBillRecurrenceScheduleRepository = userBillRecurrenceScheduleRepository;
         }
 
         /// <summary>

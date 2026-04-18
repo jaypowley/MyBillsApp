@@ -1,11 +1,10 @@
-﻿using System;
-using MyBills.Core;
-using MyBills.Data.Repositories;
+﻿using MyBills.Core;
 using MyBills.Domain.Interfaces;
+using System;
 
 namespace MyBills.Services
 {
-    public class LoginRegisterService
+    public class LoginRegisterService: ILoginRegisterService
     {
         private readonly ILogRepository _logRepository;
         private readonly IUserRepository _userRepository;
@@ -13,10 +12,10 @@ namespace MyBills.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginRegisterService"/> class.
         /// </summary>
-        public LoginRegisterService()
+        public LoginRegisterService(ILogRepository logRepository, IUserRepository userRepository)
         {
-            this._logRepository = new LogRepository();
-            this._userRepository = new UserRepository();
+            this._logRepository = logRepository;
+            this._userRepository = userRepository;
         }
 
         /// <summary>

@@ -16,16 +16,23 @@ namespace MyBills.Mvc.Controllers
     public class HomeController : Controller
     {
         private const string Format = "MMMM";
+        private readonly IUserService _userService;
+        private readonly IUserBillService _userBillService;
+        private readonly ILoginRegisterService _loginRegisterService;
+
+        public HomeController(IUserService userService, IUserBillService userBillService, ILoginRegisterService loginRegisterService)
+        {
+            _userService = userService;
+            _userBillService = userBillService;
+            _loginRegisterService = loginRegisterService;
+        }
 
         [Authorize]
         public async Task<IActionResult> Index(int? month, int? year)
         {
             var userName = User.FindFirstValue(ClaimTypes.Name); // will give the user's userName
-            var userBillService = new UserBillService();
             var usViewModel = new UserBillsViewModel();
-
-            var userService = new UserService();
-            var userId = await userService.GetUserId(userName);
+            var userId = await _userService.GetUserId(userName);
             var navHelper = UserBillService.GetNavigationHelper(month, year);
 
             ViewBag.PreviousMonth = navHelper.PrevMonth;
@@ -36,8 +43,8 @@ namespace MyBills.Mvc.Controllers
             ViewBag.NextMonthName = new DateTime(navHelper.CurrentYear, navHelper.NextMonth, 1).ToString(Format, CultureInfo.InvariantCulture);
             ViewBag.NextMonthsYear = navHelper.NextMonthsYear;
 
-            var userBills = userBillService.GetMonthlyBillSetByUserIdAndMonthYear(userId, navHelper.CurrentMonth, navHelper.CurrentYear);
-            var userDetails = await userService.GetUserDetailByUserId(userId);
+            var userBills = _userBillService.GetMonthlyBillSetByUserIdAndMonthYear(userId, navHelper.CurrentMonth, navHelper.CurrentYear);
+            var userDetails = await _userService.GetUserDetailByUserId(userId);
 
             ViewData["UsersFirstName"] = userDetails.FirstName;
             usViewModel.UserDetails = userDetails;
@@ -50,11 +57,9 @@ namespace MyBills.Mvc.Controllers
         public IActionResult PayBill(int billId, int day, int month, int year)
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);
-            var userBillService = new UserBillService();
-            var userService = new UserService();
-            var userId = userService.GetUserId(userName).Result;
+            var userId = _userService.GetUserId(userName).Result;
 
-            userBillService.MarkBillAsPaid(billId, userId, day, month, year);
+            _userBillService.MarkBillAsPaid(billId, userId, day, month, year);            
 
             var referer = Request.Headers["Referer"].ToString();
 
@@ -82,13 +87,11 @@ namespace MyBills.Mvc.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(UserLogin login)
         {
-            if (!ModelState.IsValid) return View(login);
-
-            var loginService = new LoginRegisterService();
+            if (!ModelState.IsValid) return View(login);            
 
             if (LoginRegisterService.IsLoginValid(login.Username, login.Password))
             {
-                login.IsSuccess = loginService.Login(login.Username, login.Password);
+                login.IsSuccess = _loginRegisterService.Login(login.Username, login.Password);
 
                 if (!login.IsSuccess)
                 {
@@ -122,13 +125,11 @@ namespace MyBills.Mvc.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(UserRegistration register)
         {
-            if (!ModelState.IsValid) return View(register);
-
-            var loginService = new LoginRegisterService();
+            if (!ModelState.IsValid) return View(register);            
 
             if (LoginRegisterService.IsRegistrationValid(register.Password, register.ConfirmPassword, register.Email, register.FriendlyName))
             {
-                register.IsSuccess = loginService.RegisterNewUser(register.Email, register.Password, register.FriendlyName);
+                register.IsSuccess = _loginRegisterService.RegisterNewUser(register.Email, register.Password, register.FriendlyName);
 
                 if (!register.IsSuccess)
                 {

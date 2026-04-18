@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Server.IISIntegration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyBills.Core;
+using MyBills.Data.Repositories;
+using MyBills.Domain.Interfaces;
+using MyBills.Services;
 
 namespace MyBills.Mvc
 {
@@ -25,6 +27,17 @@ namespace MyBills.Mvc
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ILoginRegisterService, LoginRegisterService>();
+            services.AddScoped<IUserBillService, UserBillService>();
+
+            services.AddTransient<IBillRepository, BillRepository>();
+            services.AddTransient<ILogRepository, LogRepository>();
+            services.AddTransient<IRecurrenceTypeRepository, RecurrenceTypeRepository>();
+            services.AddTransient<IUserBillRecurrenceScheduleRepository, UserBillRecurrenceScheduleRepository>();
+            services.AddTransient<IUserBillRepository,UserBillRepository>();
+            services.AddTransient<IUserRepository,UserRepository>();
+
             services.AddControllersWithViews();
             services.AddHttpContextAccessor();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
