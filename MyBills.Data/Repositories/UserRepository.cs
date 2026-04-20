@@ -12,14 +12,14 @@ namespace MyBills.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ILogRepository _logRepository;
+        private readonly MyBillsContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class.
         /// </summary>
-        public UserRepository()
+        public UserRepository(MyBillsContext ctx)
         {
-            this._logRepository = new LogRepository();
+            _context = ctx;
         }
 
         /// <summary>
@@ -51,20 +51,16 @@ namespace MyBills.Data.Repositories
                     UpdatedDate = DateTime.Now,
                 };
 
-                using (var ctx = new MyBillsContext())
-                {
-                    ctx.Entry(newUser).State = EntityState.Unchanged;
-                    ctx.Users.Add(user);
-                    ctx.SaveChanges();
 
-                    newUser.Id = user.Id;
-                }
+                _context.Entry(newUser).State = EntityState.Unchanged;
+                _context.Users.Add(user);
+                _context.SaveChanges();
 
-                _logRepository.WriteLog(LogLevel.Debug, "UserRepository.CreateUser", $"New User Created - {user.Email}");
+                newUser.Id = user.Id;
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.CreateUser", ex.Message, ex);
+                //TODO: Log the exception
             }
         }
 
@@ -87,17 +83,13 @@ namespace MyBills.Data.Repositories
                     second
                 };
 
-                List<Words> randomWords;
-                using (var ctx = new MyBillsContext())
-                {
-                    randomWords = ctx.Words.Where(e => idList.Contains(e.Id)).ToList();
-                }
+                List<Words> randomWords = _context.Words.Where(e => idList.Contains(e.Id)).ToList();
 
                 generatedPassword = randomWords.Aggregate(generatedPassword, (current, word) => current + (word.Word + "_"));
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "User.GenerateRandomPassword", ex.Message, ex);
+                //TODO: Log the exception
                 generatedPassword = "alpha_omega";
             }
 
@@ -109,13 +101,10 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="username">The username</param>
         /// <returns></returns>
-        private static string GetPasswordHashByEmail(string username)
+        private string GetPasswordHashByEmail(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.First(x => x.Username == username);
-            }
+            User user = _context.Users.First(x => x.Username == username);
+            
             return user.PasswordHash;
         }
 
@@ -124,13 +113,10 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="username">The username</param>
         /// <returns></returns>
-        private static User GetUserByUsername(string username)
+        private User GetUserByUsername(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user =  ctx.Users.First(x => x.Username == username);
-            }
+            User user = _context.Users.First(x => x.Username == username);
+            
             return user;
         }
 
@@ -139,13 +125,10 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="username">The username</param>
         /// <returns></returns>
-        private static async Task<User> GetUserByUsernameAsync(string username)
+        private async Task<User> GetUserByUsernameAsync(string username)
         {
-            User user;
-            await using (var ctx = new MyBillsContext())
-            {
-                user = await ctx.Users.SingleOrDefaultAsync(x => x.Username == username);
-            }
+            User user = await _context.Users.SingleOrDefaultAsync(x => x.Username == username);
+
             return user;
         }
 
@@ -160,12 +143,8 @@ namespace MyBills.Data.Repositories
         /// <returns></returns>
         public bool FindUserByUsername(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.FirstOrDefault(x => x.Username == username);
-            }
-
+            User user = _context.Users.FirstOrDefault(x => x.Username == username);
+            
             return user != null;
         }
 
@@ -176,11 +155,7 @@ namespace MyBills.Data.Repositories
         /// <returns></returns>
         public bool FindUserByEmailAddress(string emailAddress)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.FirstOrDefault(x => x.Email == emailAddress);
-            }
+            User user = _context.Users.FirstOrDefault(x => x.Email == emailAddress);
 
             return user != null;
         }
@@ -243,7 +218,7 @@ namespace MyBills.Data.Repositories
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.RegisterNewUser", ex.Message, ex, email);
+                //TODO: Log the exception
                 return false;
             }
 
@@ -257,15 +232,12 @@ namespace MyBills.Data.Repositories
         /// <returns></returns>
         public async Task<UserDetail> GetUserDetailByUserIdAsync(int userId)
         {
-            UserDetail userDetails;
-            await using (var ctx = new MyBillsContext())
-            {
-                userDetails = await (from ud in ctx.UserDetails
-                               where ud.User.Id == userId
-                               select ud).FirstOrDefaultAsync();
-            }
+              UserDetail userDetail = await (from ud in _context.UserDetails
+                                           where ud.UserId == userId
+                                           select ud).FirstAsync();
 
-            return userDetails;
+
+            return userDetail;
         }
 
         /// <summary>
@@ -276,21 +248,20 @@ namespace MyBills.Data.Repositories
         public void AddDetailsToUser(User user, string friendlyName)
         {
             try
-            {
-                using var ctx = new MyBillsContext();
-                var userAccount = ctx.Users.Single(x => x.Id == user.Id);
+            {                
+                var userAccount = _context.Users.Single(x => x.Id == user.Id);
                 var ud = new UserDetail
                 {
                     User = userAccount,
                     FirstName = friendlyName
                 };
 
-                ctx.UserDetails.Add(ud);
-                ctx.SaveChanges();
+                _context.UserDetails.Add(ud);
+                _context.SaveChanges();
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.AddDetailsToUser", ex.Message, ex);
+                //TODO: Log the exception
             }
         }
 

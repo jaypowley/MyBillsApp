@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 namespace MyBills.Services
 {
     public class UserBillService: IUserBillService
-    {
-        private readonly ILogRepository _logRepository;
+    {        
         private readonly IBillRepository _billRepository;
         private readonly IUserBillRepository _userBillRepository;
         private readonly IRecurrenceTypeRepository _recurrenceTypeRepository;
@@ -19,9 +18,8 @@ namespace MyBills.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="UserBillService"/> class.
         /// </summary>
-        public UserBillService(ILogRepository logRepository, IBillRepository billRepository, IUserBillRepository userBillRepository, IRecurrenceTypeRepository recurrenceTypeRepository, IUserBillRecurrenceScheduleRepository userBillRecurrenceScheduleRepository)
-        {
-            _logRepository = logRepository;
+        public UserBillService(IBillRepository billRepository, IUserBillRepository userBillRepository, IRecurrenceTypeRepository recurrenceTypeRepository, IUserBillRecurrenceScheduleRepository userBillRecurrenceScheduleRepository)
+        {            
             _billRepository = billRepository;
             _userBillRepository = userBillRepository;
             _recurrenceTypeRepository = recurrenceTypeRepository;
@@ -151,9 +149,9 @@ namespace MyBills.Services
 
                 _userBillRepository.CreateNewUserBill(userId, newBill, recModel, newRecSchedule);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserBillService.CreateNewUserBill", e.Message, e);
+                //TODO: Log the exception
                 return false;
             }
 
@@ -182,9 +180,9 @@ namespace MyBills.Services
             {
                 _billRepository.UpdateBill(bill);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserBillService.UpdateBill", e.Message, e);
+                //TODO: Log the exception
                 return false;
             }
 
@@ -202,9 +200,9 @@ namespace MyBills.Services
             {
                 _billRepository.DeleteUserBillByBillId(userId, billId);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserBillService.DeleteUserBillByBillId", e.Message, e);
+                //TODO: Log the exception
             }
         }
 

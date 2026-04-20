@@ -7,6 +7,13 @@ namespace MyBills.Data.Repositories
 {
     public class UserBillRecurrenceScheduleRepository : IUserBillRecurrenceScheduleRepository
     {
+        private readonly MyBillsContext _context;
+        
+        public UserBillRecurrenceScheduleRepository(MyBillsContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Get the recurrence schedule
         /// </summary>
@@ -18,12 +25,9 @@ namespace MyBills.Data.Repositories
             var recModelFormat = recModel.Format;
 
             RecurrenceSchedule recurrenceSchedule;
-            using (var ctx = new MyBillsContext())
-            {
-                recurrenceSchedule = (from ubrs in ctx.UserBillRecurrenceSchedule
-                    where ubrs.RecurrenceTypeId == recTypeId && ubrs.Schedule == recModelFormat
-                    select ubrs).FirstOrDefault();
-            }
+            recurrenceSchedule = (from ubrs in _context.UserBillRecurrenceSchedule
+                                  where ubrs.RecurrenceTypeId == recTypeId && ubrs.Schedule == recModelFormat
+                                  select ubrs).FirstOrDefault();
 
             return recurrenceSchedule ?? (new RecurrenceSchedule
             {
@@ -40,9 +44,8 @@ namespace MyBills.Data.Repositories
         /// <param name="schedule">The recurrence schedule</param>
         /// <returns></returns>
         public RecurrenceSchedule CreateNewRecurrenceSchedule(int recurrenceTypeId, string schedule)
-        {
-            using var ctx = new MyBillsContext();
-            var recurrenceType = ctx.RecurrenceType.FirstOrDefault(x => x.Id == recurrenceTypeId);
+        {            
+            var recurrenceType = _context.RecurrenceType.FirstOrDefault(x => x.Id == recurrenceTypeId);
 
             var userBillRecurrenceSchedule = new RecurrenceSchedule
             {
@@ -51,9 +54,9 @@ namespace MyBills.Data.Repositories
                 Schedule = schedule
             };
 
-            ctx.UserBillRecurrenceSchedule.Add(userBillRecurrenceSchedule);
+            _context.UserBillRecurrenceSchedule.Add(userBillRecurrenceSchedule);
 
-            ctx.SaveChanges();
+            _context.SaveChanges();
 
             return userBillRecurrenceSchedule;
         }

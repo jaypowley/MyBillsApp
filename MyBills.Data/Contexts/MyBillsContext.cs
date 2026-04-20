@@ -7,17 +7,9 @@ namespace MyBills.Data.Contexts
 {
     public sealed class MyBillsContext : DbContext
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MyBillsContext"/> class.
-        /// </summary>
-        public MyBillsContext()
+        public MyBillsContext(DbContextOptions<MyBillsContext> options)
+        : base(options)
         {
-
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-
         }
 
         public DbSet<User> Users { get; set; }
@@ -38,17 +30,16 @@ namespace MyBills.Data.Contexts
             modelBuilder
                 .ApplyConfiguration(new UserConfiguration())
                 .ApplyConfiguration(new UserDetailConfiguration())
-                .ApplyConfiguration(new WordConfiguration())
-                .ApplyConfiguration(new LogConfiguration())
+                .ApplyConfiguration(new WordConfiguration())                
                 .ApplyConfiguration(new RecurrenceTypeConfiguration())
                 .ApplyConfiguration(new UserBillConfiguration())
-                .ApplyConfiguration(new RecurrenceScheduleConfiguration())
+                .ApplyConfiguration(new RecurrenceScheduleConfiguration())                
                 .ApplyConfiguration(new BillConfiguration());
 
-            modelBuilder.Entity<UserDetail>()
-                .HasOne(p => p.User)
-                .WithMany(b => b.UserDetail)
-                .HasForeignKey(p => p.UserId);
+            //modelBuilder.Entity<UserDetail>()
+            //    .HasOne(p => p.User)
+            //    .WithMany(b => b.UserDetail)
+            //    .HasForeignKey(p => p.UserId);
 
             base.OnModelCreating(modelBuilder);
         }

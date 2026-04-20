@@ -1,7 +1,9 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MyBills.Core;
+using MyBills.Data.Contexts;
 using MyBills.Data.Repositories;
 using MyBills.Domain.Interfaces;
 using MyBills.Services;
@@ -14,7 +16,6 @@ builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
 builder.Services.AddScoped<IUserBillService, UserBillService>();
 
 builder.Services.AddTransient<IBillRepository, BillRepository>();
-builder.Services.AddTransient<ILogRepository, LogRepository>();
 builder.Services.AddTransient<IRecurrenceTypeRepository, RecurrenceTypeRepository>();
 builder.Services.AddTransient<IUserBillRecurrenceScheduleRepository, UserBillRecurrenceScheduleRepository>();
 builder.Services.AddTransient<IUserBillRepository, UserBillRepository>();
@@ -29,8 +30,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         o.LogoutPath = new PathString("/home/logout");
     });
 
-// Configure AppSettings with connection string
-AppSettings.ConnectionString = builder.Configuration.GetConnectionString("MyBillsContext");
+// Register DbContext with a connection string from configuration
+builder.Services.AddDbContext<MyBillsContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MyBillsContext")));
 
 var app = builder.Build();
 

@@ -35,7 +35,10 @@ namespace MyBills.Services
         /// <returns></returns>
         public async Task<UserDetail> GetUserDetailByUserId(int userId)
         {
-            var userDetail = await AppCache<UserDetail>.GetOrCreate("userDetail" + userId, async () => await _userRepository.GetUserDetailByUserIdAsync(userId));
+            var userDetail = await AppCache<UserDetail>.GetOrCreate(
+                "userDetail" + userId,
+                async () => await _userRepository.GetUserDetailByUserIdAsync(userId)
+            );
             return userDetail;
         }
     }

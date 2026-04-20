@@ -12,8 +12,7 @@ namespace MyBills.Data.Configurations
             builder.HasKey(s => s.Id);
             builder.Property(p => p.FirstName).HasMaxLength(50);
             builder.Property(p => p.ProfilePicture);
-            builder.Property(p => p.UserId);
-            //builder.HasRequired(p => p.User);
+            builder.Property(p => p.UserId);            
         }
     }
 }

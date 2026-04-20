@@ -5,16 +5,14 @@ using System;
 namespace MyBills.Services
 {
     public class LoginRegisterService: ILoginRegisterService
-    {
-        private readonly ILogRepository _logRepository;
+    {        
         private readonly IUserRepository _userRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginRegisterService"/> class.
         /// </summary>
-        public LoginRegisterService(ILogRepository logRepository, IUserRepository userRepository)
-        {
-            this._logRepository = logRepository;
+        public LoginRegisterService(IUserRepository userRepository)
+        {            
             this._userRepository = userRepository;
         }
 
@@ -33,7 +31,7 @@ namespace MyBills.Services
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "LoginRegisterService.Login", ex.Message, ex, username);
+                //TODO: Log the exception
                 return false;
             }
 
@@ -56,7 +54,7 @@ namespace MyBills.Services
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "LoginRegisterService.RegisterNewUser", ex.Message, ex, email);
+                //TODO: Log the exception
                 return false;
             }
 
