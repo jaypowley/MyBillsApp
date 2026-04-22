@@ -1,0 +1,17 @@
+**/.vs
+**/.vscode
+**/.idea
+**/bin
+**/obj
+**/TestResults
+**/node_modules
+**/*.user
+**/*.suo
+**/*.cache
+**/*.pdb
+**/*.nupkg
+**/.DS_Store
+**/docker-compose*
+.git
+.gitignore
+.github

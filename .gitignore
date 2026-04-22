@@ -113,3 +113,6 @@ Desktop.ini
 
 # Mac files
 .DS_Store
+
+# Local environment variables for Docker Compose
+.env
