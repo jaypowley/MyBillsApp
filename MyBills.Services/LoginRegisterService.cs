@@ -1,22 +1,20 @@
-﻿using System;
-using MyBills.Core;
-using MyBills.Data.Repositories;
+﻿using MyBills.Core;
 using MyBills.Domain.Interfaces;
+using System;
+using System.Threading.Tasks;
 
 namespace MyBills.Services
 {
-    public class LoginRegisterService
-    {
-        private readonly ILogRepository _logRepository;
+    public class LoginRegisterService: ILoginRegisterService
+    {        
         private readonly IUserRepository _userRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginRegisterService"/> class.
         /// </summary>
-        public LoginRegisterService()
-        {
-            this._logRepository = new LogRepository();
-            this._userRepository = new UserRepository();
+        public LoginRegisterService(IUserRepository userRepository)
+        {            
+            this._userRepository = userRepository;
         }
 
         /// <summary>
@@ -25,16 +23,16 @@ namespace MyBills.Services
         /// <param name="username">The username</param>
         /// <param name="password">The password</param>
         /// <returns></returns>
-        public bool Login(string username, string password)
+        public async Task<bool> LoginAsync(string username, string password)
         {
             try
             {
-                var isSuccess = _userRepository.FindUserByUsername(username);
-                if (isSuccess) return _userRepository.AuthenticateUser(username, password);
+                var isSuccess = await _userRepository.FindUserByUsernameAsync(username);
+                if (isSuccess) return await _userRepository.AuthenticateUserAsync(username, password);
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "LoginRegisterService.Login", ex.Message, ex, username);
+                //TODO: Log the exception
                 return false;
             }
 
@@ -48,16 +46,16 @@ namespace MyBills.Services
         /// <param name="password">The password</param>
         /// <param name="friendlyName">The friendly name of the user</param>
         /// <returns></returns>
-        public bool RegisterNewUser(string email, string password, string friendlyName)
+        public async Task<bool> RegisterNewUserAsync(string email, string password, string friendlyName)
         {
             try
             {
-                var isSuccess = _userRepository.RegisterNewUser(email, password, friendlyName);
-                if (isSuccess) return _userRepository.AuthenticateUser(email, password);
+                var isSuccess = await _userRepository.RegisterNewUserAsync(email, password, friendlyName);
+                if (isSuccess) return await _userRepository.AuthenticateUserAsync(email, password);
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "LoginRegisterService.RegisterNewUser", ex.Message, ex, email);
+                //TODO: Log the exception
                 return false;
             }
 

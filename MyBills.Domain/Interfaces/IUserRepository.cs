@@ -5,20 +5,18 @@ namespace MyBills.Domain.Interfaces
 {
     public interface IUserRepository
     {
-        bool FindUserByUsername(string username);
+        Task<bool> FindUserByUsernameAsync(string username);
 
-        bool FindUserByEmailAddress(string emailAddress);
+        Task<bool> FindUserByEmailAddressAsync(string emailAddress);
 
-        bool AuthenticateUser(string username, string password);
-
-        int GetUserId(string name);
+        Task<bool> AuthenticateUserAsync(string username, string password);
 
         Task<int> GetUserIdAsync(string name);
 
-        bool RegisterNewUser(string email, string password, string friendlyName);
+        Task<bool> RegisterNewUserAsync(string email, string password, string friendlyName);
 
         Task<UserDetail> GetUserDetailByUserIdAsync(int userId);
 
-        void AddDetailsToUser(User user, string friendlyName);
+        Task AddDetailsToUserAsync(User user, string friendlyName);
     }
 }

@@ -13,5 +13,9 @@
     <_SelectedScaffolderCategoryPath>root/Common</_SelectedScaffolderCategoryPath>
     <WebStackScaffolding_DbContextTypeFullName>MyBills.Data.Contexts.MyBillsContext</WebStackScaffolding_DbContextTypeFullName>
     <WebStackScaffolding_IsViewGenerationSelected>True</WebStackScaffolding_IsViewGenerationSelected>
+    <ActiveDebugProfile>IIS Express</ActiveDebugProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>

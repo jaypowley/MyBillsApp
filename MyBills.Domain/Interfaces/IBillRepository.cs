@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using MyBills.Domain.Entities;
 
 namespace MyBills.Domain.Interfaces
 {
     public interface IBillRepository
     {
-        List<Bill> GetUserBills(int userId);
+        Task<List<Bill>> GetUserBillsAsync(int userId);
 
-        Bill GetUserBillByBillId(int userId, int billId);
+        Task<Bill> GetUserBillByBillIdAsync(int userId, int billId);
 
-        Bill CreateNewBill(Bill bill);
+        Task<Bill> CreateNewBillAsync(Bill bill);
 
-        void UpdateBill(Bill bill);
+        Task UpdateBillAsync(Bill bill);
 
-        void DeleteUserBillByBillId(int userId, int billId);
+        Task DeleteUserBillByBillIdAsync(int userId, int billId);
 
     }
 }

@@ -11,18 +11,20 @@ namespace MyBills.Data.Repositories
 
     public class RecurrenceTypeRepository: IRecurrenceTypeRepository
     {
+        private readonly MyBillsContext _context;
+
+        public RecurrenceTypeRepository(MyBillsContext context)
+        {
+            _context = context;
+        }
+
         /// <summary>
         /// Gets the bill recurrence types
         /// </summary>
         /// <returns></returns>
         public async Task<List<RecurrenceType>> GetRecurrenceTypesAsync()
         {
-            List<RecurrenceType> recurrenceTypeList;
-
-            await using (var ctx = new MyBillsContext())
-            {
-                recurrenceTypeList = await ctx.RecurrenceType.OrderBy(x => x.Id).ToListAsync();
-            }
+            List<RecurrenceType> recurrenceTypeList = await _context.RecurrenceType.OrderBy(x => x.Id).ToListAsync();
 
             return recurrenceTypeList;
         }

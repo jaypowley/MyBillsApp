@@ -1,21 +1,20 @@
-﻿using System.Threading.Tasks;
-using MyBills.Core;
-using MyBills.Data.Repositories;
+﻿using MyBills.Core;
 using MyBills.Domain.Entities;
 using MyBills.Domain.Interfaces;
+using System.Threading.Tasks;
 
 namespace MyBills.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
-        public UserService()
+        public UserService(IUserRepository userRepository)
         {
-            _userRepository = new UserRepository();
+            _userRepository = userRepository;
         }
 
         /// <summary>
@@ -36,7 +35,10 @@ namespace MyBills.Services
         /// <returns></returns>
         public async Task<UserDetail> GetUserDetailByUserId(int userId)
         {
-            var userDetail = await AppCache<UserDetail>.GetOrCreate("userDetail" + userId, async () => await _userRepository.GetUserDetailByUserIdAsync(userId));
+            var userDetail = await AppCache<UserDetail>.GetOrCreate(
+                "userDetail" + userId,
+                async () => await _userRepository.GetUserDetailByUserIdAsync(userId)
+            );
             return userDetail;
         }
     }

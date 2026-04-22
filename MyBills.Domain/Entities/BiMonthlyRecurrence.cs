@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -15,7 +15,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "BiMonthly";
 
-        public string Format => JsonConvert.SerializeObject(new { type = Name, firstDueDate = FirstDueDate, secondDueDate = SecondDueDate });
+        public string Format => JsonSerializer.Serialize(new { type = Name, firstDueDate = FirstDueDate, secondDueDate = SecondDueDate });
 
         public BiMonthlyRecurrence()
         {
@@ -24,7 +24,7 @@ namespace MyBills.Domain.Entities
 
         public BiMonthlyRecurrence(string schedule)
         {
-            var outObject = JsonConvert.DeserializeObject<BiMonthlyRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<BiMonthlyRecurrence>(schedule);
             FirstDueDate = outObject.FirstDueDate;
             SecondDueDate = outObject.SecondDueDate;
         }

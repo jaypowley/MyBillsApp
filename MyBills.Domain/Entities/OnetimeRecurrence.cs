@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -13,7 +13,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "Onetime";
 
-        public string Format => JsonConvert.SerializeObject(new { type = Name, dueDate = DueDate });
+        public string Format => JsonSerializer.Serialize(new { type = Name, dueDate = DueDate });
 
         public OnetimeRecurrence()
         {
@@ -22,7 +22,7 @@ namespace MyBills.Domain.Entities
 
         public OnetimeRecurrence(string schedule)
         {
-            var outObject = JsonConvert.DeserializeObject<OnetimeRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<OnetimeRecurrence>(schedule);
             DueDate = outObject.DueDate;
         }
     }

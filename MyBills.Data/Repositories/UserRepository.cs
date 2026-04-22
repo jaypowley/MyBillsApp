@@ -12,29 +12,25 @@ namespace MyBills.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly ILogRepository _logRepository;
+        private readonly MyBillsContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserRepository"/> class.
         /// </summary>
-        public UserRepository()
+        public UserRepository(MyBillsContext ctx)
         {
-            this._logRepository = new LogRepository();
+            _context = ctx;
         }
 
-        /// <summary>
-        /// Creates a new user
-        /// </summary>
-        /// <param name="newUser">The <see cref="User"></see></param>
         #region Private Methods
-        private void CreateUser(User newUser)
+        private async Task CreateUserAsync(User newUser)
         {
             try
             {
                 string newPass;
                 if (newUser.PasswordHash.Trim() == string.Empty)
                 {
-                    var randomWordPass = GenerateRandomPassword();
+                    var randomWordPass = await GenerateRandomPasswordAsync();
                     newPass = Authentication.Compute(randomWordPass);
                 }
                 else
@@ -51,28 +47,20 @@ namespace MyBills.Data.Repositories
                     UpdatedDate = DateTime.Now,
                 };
 
-                using (var ctx = new MyBillsContext())
-                {
-                    ctx.Entry(newUser).State = EntityState.Unchanged;
-                    ctx.Users.Add(user);
-                    ctx.SaveChanges();
 
-                    newUser.Id = user.Id;
-                }
+                _context.Entry(newUser).State = EntityState.Unchanged;
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
 
-                _logRepository.WriteLog(LogLevel.Debug, "UserRepository.CreateUser", $"New User Created - {user.Email}");
+                newUser.Id = user.Id;
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.CreateUser", ex.Message, ex);
+                //TODO: Log the exception
             }
         }
 
-        /// <summary>
-        /// Generates a random password
-        /// </summary>
-        /// <returns></returns>
-        private string GenerateRandomPassword()
+        private async Task<string> GenerateRandomPasswordAsync()
         {
             var generatedPassword = String.Empty;
 
@@ -87,146 +75,59 @@ namespace MyBills.Data.Repositories
                     second
                 };
 
-                List<Words> randomWords;
-                using (var ctx = new MyBillsContext())
-                {
-                    randomWords = ctx.Words.Where(e => idList.Contains(e.Id)).ToList();
-                }
+                var randomWords = await _context.Words.Where(e => idList.Contains(e.Id)).ToListAsync();
 
                 generatedPassword = randomWords.Aggregate(generatedPassword, (current, word) => current + (word.Word + "_"));
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "User.GenerateRandomPassword", ex.Message, ex);
+                //TODO: Log the exception
                 generatedPassword = "alpha_omega";
             }
 
             return generatedPassword.TrimEnd('_');
         }
 
-        /// <summary>
-        /// Gets the password hash by the passed username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
-        private static string GetPasswordHashByEmail(string username)
+        private async Task<string> GetPasswordHashByEmailAsync(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.First(x => x.Username == username);
-            }
-            return user.PasswordHash;
+            return await _context.Users
+                .Where(x => x.Username == username)
+                .Select(x => x.PasswordHash)
+                .FirstOrDefaultAsync();
         }
 
-        /// <summary>
-        /// Gets the user by username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
-        private static User GetUserByUsername(string username)
+        private async Task<User> GetUserByUsernameAsync(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user =  ctx.Users.First(x => x.Username == username);
-            }
-            return user;
-        }
-
-        /// <summary>
-        /// Gets the user by username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
-        private static async Task<User> GetUserByUsernameAsync(string username)
-        {
-            User user;
-            await using (var ctx = new MyBillsContext())
-            {
-                user = await ctx.Users.SingleOrDefaultAsync(x => x.Username == username);
-            }
-            return user;
+            return await _context.Users.SingleOrDefaultAsync(x => x.Username == username);
         }
 
         #endregion
 
         #region Public Methods
 
-        /// <summary>
-        /// Checks if user exists by username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
-        public bool FindUserByUsername(string username)
+        public async Task<bool> FindUserByUsernameAsync(string username)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.FirstOrDefault(x => x.Username == username);
-            }
-
-            return user != null;
+            return await _context.Users.AnyAsync(x => x.Username == username);
         }
 
-        /// <summary>
-        /// Checks if user exists by email address
-        /// </summary>
-        /// <param name="emailAddress">The email address</param>
-        /// <returns></returns>
-        public bool FindUserByEmailAddress(string emailAddress)
+        public async Task<bool> FindUserByEmailAddressAsync(string emailAddress)
         {
-            User user;
-            using (var ctx = new MyBillsContext())
-            {
-                user = ctx.Users.FirstOrDefault(x => x.Email == emailAddress);
-            }
-
-            return user != null;
+            return await _context.Users.AnyAsync(x => x.Email == emailAddress);
         }
 
-        /// <summary>
-        /// Authenticates the user by verifying that supplied password matches persisted password 
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <param name="password2">The password</param>
-        /// <returns></returns>
-        public bool AuthenticateUser(string username, string password2)
+        public async Task<bool> AuthenticateUserAsync(string username, string password)
         {
-            var storedHash = GetPasswordHashByEmail(username);
-            return storedHash != null && Authentication.Verify(password2, storedHash);
+            var storedHash = await GetPasswordHashByEmailAsync(username);
+            return storedHash != null && Authentication.Verify(password, storedHash);
         }
 
-        /// <summary>
-        /// Gets user id by username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
-        public int GetUserId(string username)
-        {
-            var user = GetUserByUsername(username);
-            return user.Id;
-        }
-
-        /// <summary>
-        /// Gets user id by username
-        /// </summary>
-        /// <param name="username">The username</param>
-        /// <returns></returns>
         public async Task<int> GetUserIdAsync(string username)
         {
             var user = await GetUserByUsernameAsync(username);
             return user.Id;
         }
 
-        /// <summary>
-        /// Saves the new user information
-        /// </summary>
-        /// <param name="email">The email address</param>
-        /// <param name="password">The password</param>
-        /// <param name="friendlyName">The friendly name of the user</param>
-        /// <returns></returns>
-        public bool RegisterNewUser(string email, string password, string friendlyName)
+        public async Task<bool> RegisterNewUserAsync(string email, string password, string friendlyName)
         {
             var user = new User
             {
@@ -238,59 +139,42 @@ namespace MyBills.Data.Repositories
 
             try
             {
-                CreateUser(user);
-                AddDetailsToUser(user, friendlyName);
+                await CreateUserAsync(user);
+                await AddDetailsToUserAsync(user, friendlyName);
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.RegisterNewUser", ex.Message, ex, email);
+                //TODO: Log the exception
                 return false;
             }
 
             return true;
         }
 
-        /// <summary>
-        /// Gets the user details by user id
-        /// </summary>
-        /// <param name="userId">The user id</param>
-        /// <returns></returns>
         public async Task<UserDetail> GetUserDetailByUserIdAsync(int userId)
         {
-            UserDetail userDetails;
-            await using (var ctx = new MyBillsContext())
-            {
-                userDetails = await (from ud in ctx.UserDetails
-                               where ud.User.Id == userId
-                               select ud).FirstOrDefaultAsync();
-            }
-
-            return userDetails;
+            return await (from ud in _context.UserDetails
+                          where ud.UserId == userId
+                          select ud).FirstAsync();
         }
 
-        /// <summary>
-        /// Add the user details to the registered user
-        /// </summary>
-        /// <param name="user">The <see cref="User"></see></param>
-        /// <param name="friendlyName">The friendly name of the user</param>
-        public void AddDetailsToUser(User user, string friendlyName)
+        public async Task AddDetailsToUserAsync(User user, string friendlyName)
         {
             try
             {
-                using var ctx = new MyBillsContext();
-                var userAccount = ctx.Users.Single(x => x.Id == user.Id);
+                var userAccount = await _context.Users.SingleAsync(x => x.Id == user.Id);
                 var ud = new UserDetail
                 {
                     User = userAccount,
                     FirstName = friendlyName
                 };
 
-                ctx.UserDetails.Add(ud);
-                ctx.SaveChanges();
+                _context.UserDetails.Add(ud);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logRepository.WriteLog(LogLevel.Error, "UserRepository.AddDetailsToUser", ex.Message, ex);
+                //TODO: Log the exception
             }
         }
 

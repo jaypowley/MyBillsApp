@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json;
 using MyBills.Domain.Interfaces;
-using Newtonsoft.Json;
 
 namespace MyBills.Domain.Entities
 {
@@ -12,7 +12,7 @@ namespace MyBills.Domain.Entities
 
         public string Name => "Weekly";
 
-        public string Format => JsonConvert.SerializeObject(new { type = Name, dayOfTheWeek = DayOfTheWeek });
+        public string Format => JsonSerializer.Serialize(new { type = Name, dayOfTheWeek = DayOfTheWeek });
 
         public WeeklyRecurrence()
         {
@@ -21,7 +21,7 @@ namespace MyBills.Domain.Entities
 
         public WeeklyRecurrence(string schedule)
         {
-            var outObject = JsonConvert.DeserializeObject<WeeklyRecurrence>(schedule);
+            var outObject = JsonSerializer.Deserialize<WeeklyRecurrence>(schedule);
             DayOfTheWeek = outObject.DayOfTheWeek;
         }
     }
