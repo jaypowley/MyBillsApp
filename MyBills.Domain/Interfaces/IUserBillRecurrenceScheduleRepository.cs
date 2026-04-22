@@ -1,11 +1,12 @@
-﻿using MyBills.Domain.Entities;
+﻿using System.Threading.Tasks;
+using MyBills.Domain.Entities;
 
 namespace MyBills.Domain.Interfaces
 {
     public interface IUserBillRecurrenceScheduleRepository
     {
-        RecurrenceSchedule GetRecSchedule(int recTypeId, IRecurrenceModel recModel);
+        Task<RecurrenceSchedule> GetRecScheduleAsync(int recTypeId, IRecurrenceModel recModel);
 
-        RecurrenceSchedule CreateNewRecurrenceSchedule(int recurrenceTypeId, string schedule);
+        Task<RecurrenceSchedule> CreateNewRecurrenceScheduleAsync(int recurrenceTypeId, string schedule);
     }
 }

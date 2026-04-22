@@ -1,8 +1,10 @@
-﻿namespace MyBills.Services
+﻿using System.Threading.Tasks;
+
+namespace MyBills.Services
 {
     public interface ILoginRegisterService
     {
-        bool Login(string username, string password);
-        bool RegisterNewUser(string email, string password, string friendlyName);
+        Task<bool> LoginAsync(string username, string password);
+        Task<bool> RegisterNewUserAsync(string email, string password, string friendlyName);
     }
 }

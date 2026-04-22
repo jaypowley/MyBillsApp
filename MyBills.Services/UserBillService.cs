@@ -33,11 +33,11 @@ namespace MyBills.Services
         /// <param name="month">The month</param>
         /// <param name="year">The year</param>
         /// <returns></returns>
-        public MonthlyBillSet GetMonthlyBillSetByUserIdAndMonthYear(int userId, int month, int year)
+        public async Task<MonthlyBillSet> GetMonthlyBillSetByUserIdAndMonthYearAsync(int userId, int month, int year)
         {
-            var userBills = _userBillRepository.GetBillsByUserIdAndMonthYear(userId, month, year);
+            var userBills = await _userBillRepository.GetBillsByUserIdAndMonthYearAsync(userId, month, year);
 
-            userBills = !userBills.Any() ? _userBillRepository.GenerateRecurringBills(userId, month, year) : userBills;
+            userBills = !userBills.Any() ? await _userBillRepository.GenerateRecurringBillsAsync(userId, month, year) : userBills;
 
             var mbs = new MonthlyBillSet()
             {
@@ -57,9 +57,9 @@ namespace MyBills.Services
         /// <param name="userId">The user id</param>
         /// <param name="billId">The bill id</param>
         /// <returns></returns>
-        public Bill GetUserBillByBillId(int userId, int billId)
+        public async Task<Bill> GetUserBillByBillIdAsync(int userId, int billId)
         {
-            return _billRepository.GetUserBillByBillId(userId, billId);
+            return await _billRepository.GetUserBillByBillIdAsync(userId, billId);
         }
 
         /// <summary>
@@ -81,9 +81,9 @@ namespace MyBills.Services
         /// <param name="day">The day</param>
         /// <param name="month">The month</param>
         /// <param name="year">The year</param>
-        public void MarkBillAsPaid(int billId, int userId, int day, int month, int year)
+        public async Task MarkBillAsPaidAsync(int billId, int userId, int day, int month, int year)
         {
-            _userBillRepository.MarkBillAsPaid(billId, userId, day, month, year);
+            await _userBillRepository.MarkBillAsPaidAsync(billId, userId, day, month, year);
         }
 
         /// <summary>
@@ -91,9 +91,9 @@ namespace MyBills.Services
         /// </summary>
         /// <param name="userId">The user id</param>
         /// <returns></returns>
-        public UserBillSet GetBillsByUserIdConsolidated(int userId)
+        public async Task<UserBillSet> GetBillsByUserIdConsolidatedAsync(int userId)
         {
-            return _userBillRepository.GetBillsByUserIdConsolidated(userId);
+            return await _userBillRepository.GetBillsByUserIdConsolidatedAsync(userId);
         }
 
         /// <summary>
@@ -139,15 +139,15 @@ namespace MyBills.Services
         /// <param name="recModel">The recurrence model</param>
         /// <param name="recSchedule">The recurrence schedule</param>
         /// <returns></returns>
-        public bool CreateNewUserBill(int userId, Bill bill, IRecurrenceModel recModel, RecurrenceSchedule recSchedule)
+        public async Task<bool> CreateNewUserBillAsync(int userId, Bill bill, IRecurrenceModel recModel, RecurrenceSchedule recSchedule)
         {
             try
             {
-                var newBill = _billRepository.CreateNewBill(bill);
+                var newBill = await _billRepository.CreateNewBillAsync(bill);
 
-                var newRecSchedule = _userBillRecurrenceScheduleRepository.CreateNewRecurrenceSchedule(recSchedule.RecurrenceTypeId, recSchedule.Schedule);
+                var newRecSchedule = await _userBillRecurrenceScheduleRepository.CreateNewRecurrenceScheduleAsync(recSchedule.RecurrenceTypeId, recSchedule.Schedule);
 
-                _userBillRepository.CreateNewUserBill(userId, newBill, recModel, newRecSchedule);
+                await _userBillRepository.CreateNewUserBillAsync(userId, newBill, recModel, newRecSchedule);
             }
             catch (Exception ex)
             {
@@ -164,9 +164,9 @@ namespace MyBills.Services
         /// <param name="recurrenceTypeId">The recurrence type id</param>
         /// <param name="recModel">The recurrence model</param>
         /// <returns></returns>
-        public RecurrenceSchedule GetRecSchedule(int recurrenceTypeId, IRecurrenceModel recModel)
+        public async Task<RecurrenceSchedule> GetRecScheduleAsync(int recurrenceTypeId, IRecurrenceModel recModel)
         {
-            return _userBillRecurrenceScheduleRepository.GetRecSchedule(recurrenceTypeId, recModel);
+            return await _userBillRecurrenceScheduleRepository.GetRecScheduleAsync(recurrenceTypeId, recModel);
         }
 
         /// <summary>
@@ -174,11 +174,11 @@ namespace MyBills.Services
         /// </summary>
         /// <param name="bill">The bill object</param>
         /// <returns></returns>
-        public bool UpdateUserBill(Bill bill)
+        public async Task<bool> UpdateUserBillAsync(Bill bill)
         {
             try
             {
-                _billRepository.UpdateBill(bill);
+                await _billRepository.UpdateBillAsync(bill);
             }
             catch (Exception ex)
             {
@@ -194,11 +194,11 @@ namespace MyBills.Services
         /// </summary>
         /// <param name="userId">The user id</param>
         /// <param name="billId">The bill id</param>
-        public void DeleteUserBillByBillId(int userId, int billId)
+        public async Task DeleteUserBillByBillIdAsync(int userId, int billId)
         {
             try
             {
-                _billRepository.DeleteUserBillByBillId(userId, billId);
+                await _billRepository.DeleteUserBillByBillIdAsync(userId, billId);
             }
             catch (Exception ex)
             {

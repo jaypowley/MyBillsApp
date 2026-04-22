@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using MyBills.Domain.Entities;
 
 namespace MyBills.Domain.Interfaces
 {
     public interface IUserBillRepository
     {
-        void MarkBillAsPaid(int billId, int userId, int day, int month, int year);
+        Task MarkBillAsPaidAsync(int billId, int userId, int day, int month, int year);
 
-        UserBillSet GetBillsByUserIdConsolidated(int userId);
+        Task<UserBillSet> GetBillsByUserIdConsolidatedAsync(int userId);
 
-        List<UserBill> GetBillsByUserIdAndMonthYear(int userId, int month, int year);
+        Task<List<UserBill>> GetBillsByUserIdAndMonthYearAsync(int userId, int month, int year);
 
-        List<UserBill> GenerateRecurringBills(int userId, int month, int year);
+        Task<List<UserBill>> GenerateRecurringBillsAsync(int userId, int month, int year);
 
-        void CreateNewUserBill(int userId, Bill bill, IRecurrenceModel model, RecurrenceSchedule recurrenceSchedule);
+        Task CreateNewUserBillAsync(int userId, Bill bill, IRecurrenceModel model, RecurrenceSchedule recurrenceSchedule);
     }
 }

@@ -7,15 +7,15 @@ namespace MyBills.Services
 {
     public interface IUserBillService
     {
-        MonthlyBillSet GetMonthlyBillSetByUserIdAndMonthYear(int userId, int month, int year);
-        Bill GetUserBillByBillId(int userId, int billId);
+        Task<MonthlyBillSet> GetMonthlyBillSetByUserIdAndMonthYearAsync(int userId, int month, int year);
+        Task<Bill> GetUserBillByBillIdAsync(int userId, int billId);
         Task<List<RecurrenceType>> GetRecurrenceTypes();
-        void MarkBillAsPaid(int billId, int userId, int day, int month, int year);
-        UserBillSet GetBillsByUserIdConsolidated(int userId);
-        bool CreateNewUserBill(int userId, Bill bill, IRecurrenceModel recModel, RecurrenceSchedule recSchedule);
-        RecurrenceSchedule GetRecSchedule(int recurrenceTypeId, IRecurrenceModel recModel);
-        bool UpdateUserBill(Bill bill);
-        void DeleteUserBillByBillId(int userId, int billId);
+        Task MarkBillAsPaidAsync(int billId, int userId, int day, int month, int year);
+        Task<UserBillSet> GetBillsByUserIdConsolidatedAsync(int userId);
+        Task<bool> CreateNewUserBillAsync(int userId, Bill bill, IRecurrenceModel recModel, RecurrenceSchedule recSchedule);
+        Task<RecurrenceSchedule> GetRecScheduleAsync(int recurrenceTypeId, IRecurrenceModel recModel);
+        Task<bool> UpdateUserBillAsync(Bill bill);
+        Task DeleteUserBillByBillIdAsync(int userId, int billId);
 
     }
 }

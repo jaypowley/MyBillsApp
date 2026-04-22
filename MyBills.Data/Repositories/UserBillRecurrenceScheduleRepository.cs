@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using MyBills.Data.Contexts;
 using MyBills.Domain.Entities;
 using MyBills.Domain.Interfaces;
@@ -20,14 +22,13 @@ namespace MyBills.Data.Repositories
         /// <param name="recTypeId">The recurrence type id</param>
         /// <param name="recModel">The recurrence model</param>
         /// <returns></returns>
-        public RecurrenceSchedule GetRecSchedule(int recTypeId, IRecurrenceModel recModel)
+        public async Task<RecurrenceSchedule> GetRecScheduleAsync(int recTypeId, IRecurrenceModel recModel)
         {
             var recModelFormat = recModel.Format;
 
-            RecurrenceSchedule recurrenceSchedule;
-            recurrenceSchedule = (from ubrs in _context.UserBillRecurrenceSchedule
-                                  where ubrs.RecurrenceTypeId == recTypeId && ubrs.Schedule == recModelFormat
-                                  select ubrs).FirstOrDefault();
+            var recurrenceSchedule = await (from ubrs in _context.UserBillRecurrenceSchedule
+                                            where ubrs.RecurrenceTypeId == recTypeId && ubrs.Schedule == recModelFormat
+                                            select ubrs).FirstOrDefaultAsync();
 
             return recurrenceSchedule ?? (new RecurrenceSchedule
             {
@@ -43,9 +44,9 @@ namespace MyBills.Data.Repositories
         /// <param name="recurrenceTypeId">The recurrence type id</param>
         /// <param name="schedule">The recurrence schedule</param>
         /// <returns></returns>
-        public RecurrenceSchedule CreateNewRecurrenceSchedule(int recurrenceTypeId, string schedule)
+        public async Task<RecurrenceSchedule> CreateNewRecurrenceScheduleAsync(int recurrenceTypeId, string schedule)
         {            
-            var recurrenceType = _context.RecurrenceType.FirstOrDefault(x => x.Id == recurrenceTypeId);
+            var recurrenceType = await _context.RecurrenceType.FirstOrDefaultAsync(x => x.Id == recurrenceTypeId);
 
             var userBillRecurrenceSchedule = new RecurrenceSchedule
             {
@@ -56,7 +57,7 @@ namespace MyBills.Data.Repositories
 
             _context.UserBillRecurrenceSchedule.Add(userBillRecurrenceSchedule);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return userBillRecurrenceSchedule;
         }

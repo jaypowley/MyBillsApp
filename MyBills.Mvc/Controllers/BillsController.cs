@@ -30,7 +30,7 @@ namespace MyBills.Mvc.Controllers
             var ubViewModel = new UserBillsViewModel
             {
                 UserDetails = userDetails,
-                UserBillSet = _userBillService.GetBillsByUserIdConsolidated(userId)
+                UserBillSet = await _userBillService.GetBillsByUserIdConsolidatedAsync(userId)
             };
 
             ViewData["UsersFirstName"] = userDetails.FirstName;
@@ -63,8 +63,8 @@ namespace MyBills.Mvc.Controllers
             var userName = User.FindFirstValue(ClaimTypes.Name);            
             var userId = await _userService.GetUserId(userName);
             var recModel = UserBillService.GetRecModel(billViewModel);
-            var recSchedule = _userBillService.GetRecSchedule(billViewModel.RecurrenceTypeId, recModel);
-            var isSuccess = _userBillService.CreateNewUserBill(userId, billViewModel.Bill, recModel, recSchedule);
+            var recSchedule = await _userBillService.GetRecScheduleAsync(billViewModel.RecurrenceTypeId, recModel);
+            var isSuccess = await _userBillService.CreateNewUserBillAsync(userId, billViewModel.Bill, recModel, recSchedule);
 
             if (isSuccess) return RedirectToAction("Index");
 
@@ -84,7 +84,7 @@ namespace MyBills.Mvc.Controllers
             }
             
             var userId = await _userService.GetUserId(userName);
-            var billToEdit = _userBillService.GetUserBillByBillId(userId, billId);
+            var billToEdit = await _userBillService.GetUserBillByBillIdAsync(userId, billId);
 
             if (billToEdit == null)
             {
@@ -99,11 +99,11 @@ namespace MyBills.Mvc.Controllers
 
         // POST: Bills/Edit/5
         [HttpPost, ValidateAntiForgeryToken]
-        public IActionResult Edit(Bill bill)
+        public async Task<IActionResult> Edit(Bill bill)
         {
             if (ModelState.IsValid)
             {
-                var isSuccess = _userBillService.UpdateUserBill(bill);
+                var isSuccess = await _userBillService.UpdateUserBillAsync(bill);
 
                 if (isSuccess) return RedirectToAction("Index");
             }
@@ -123,7 +123,7 @@ namespace MyBills.Mvc.Controllers
             }
             
             var userId = await _userService.GetUserId(userName);
-            var billToDelete = _userBillService.GetUserBillByBillId(userId, billId);
+            var billToDelete = await _userBillService.GetUserBillByBillIdAsync(userId, billId);
 
             if (billToDelete == null)
             {
@@ -143,7 +143,7 @@ namespace MyBills.Mvc.Controllers
             var userName = User.FindFirstValue(ClaimTypes.Name);
             var userId = await _userService.GetUserId(userName);
             
-            _userBillService.DeleteUserBillByBillId(userId, id);
+            await _userBillService.DeleteUserBillByBillIdAsync(userId, id);
 
             return RedirectToAction("Index");
         }

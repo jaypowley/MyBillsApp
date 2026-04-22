@@ -43,7 +43,7 @@ namespace MyBills.Mvc.Controllers
             ViewBag.NextMonthName = new DateTime(navHelper.CurrentYear, navHelper.NextMonth, 1).ToString(Format, CultureInfo.InvariantCulture);
             ViewBag.NextMonthsYear = navHelper.NextMonthsYear;
 
-            var userBills = _userBillService.GetMonthlyBillSetByUserIdAndMonthYear(userId, navHelper.CurrentMonth, navHelper.CurrentYear);
+            var userBills = await _userBillService.GetMonthlyBillSetByUserIdAndMonthYearAsync(userId, navHelper.CurrentMonth, navHelper.CurrentYear);
             var userDetails = await _userService.GetUserDetailByUserId(userId);
 
             ViewData["UsersFirstName"] = userDetails.FirstName;
@@ -54,12 +54,12 @@ namespace MyBills.Mvc.Controllers
         }
 
         [Authorize]
-        public IActionResult PayBill(int billId, int day, int month, int year)
+        public async Task<IActionResult> PayBill(int billId, int day, int month, int year)
         {
             var userName = User.FindFirstValue(ClaimTypes.Name);
-            var userId = _userService.GetUserId(userName).Result;
+            var userId = await _userService.GetUserId(userName);
 
-            _userBillService.MarkBillAsPaid(billId, userId, day, month, year);            
+            await _userBillService.MarkBillAsPaidAsync(billId, userId, day, month, year);
 
             var referer = Request.Headers["Referer"].ToString();
 
@@ -91,7 +91,7 @@ namespace MyBills.Mvc.Controllers
 
             if (LoginRegisterService.IsLoginValid(login.Username, login.Password))
             {
-                login.IsSuccess = _loginRegisterService.Login(login.Username, login.Password);
+                login.IsSuccess = await _loginRegisterService.LoginAsync(login.Username, login.Password);
 
                 if (!login.IsSuccess)
                 {
@@ -129,7 +129,7 @@ namespace MyBills.Mvc.Controllers
 
             if (LoginRegisterService.IsRegistrationValid(register.Password, register.ConfirmPassword, register.Email, register.FriendlyName))
             {
-                register.IsSuccess = _loginRegisterService.RegisterNewUser(register.Email, register.Password, register.FriendlyName);
+                register.IsSuccess = await _loginRegisterService.RegisterNewUserAsync(register.Email, register.Password, register.FriendlyName);
 
                 if (!register.IsSuccess)
                 {

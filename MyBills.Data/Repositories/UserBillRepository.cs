@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyBills.Data.Contexts;
 using MyBills.Domain.Entities;
@@ -27,15 +28,15 @@ namespace MyBills.Data.Repositories
         /// <param name="day">The bill day</param>
         /// <param name="month">The bill month</param>
         /// <param name="year">The bill year</param>
-        public void MarkBillAsPaid(int billId, int userId, int day, int month, int year)
+        public async Task MarkBillAsPaidAsync(int billId, int userId, int day, int month, int year)
         {
-            var bill = _context.UserBills.SingleOrDefault(x => x.BillId == billId && x.User.Id == userId && x.Day == day && x.Month == month && x.Year == year);
+            var bill = await _context.UserBills.SingleOrDefaultAsync(x => x.BillId == billId && x.User.Id == userId && x.Day == day && x.Month == month && x.Year == year);
             if (bill == null) return;
 
             var newValue = !bill.IsPaid;
             bill.IsPaid = newValue;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -43,45 +44,38 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="userId">The user id</param>
         /// <returns></returns>
-        public UserBillSet GetBillsByUserIdConsolidated(int userId)
+        public async Task<UserBillSet> GetBillsByUserIdConsolidatedAsync(int userId)
         {
-            UserBillSet ubs;
-
-
-            var userBillDetails = (from ub in _context.UserBills
-                                   join bill in _context.Bills on ub.Bill equals bill
-                                   join ubrs in _context.UserBillRecurrenceSchedule on ub.RecurrenceSchedule equals ubrs
-                                   join rt in _context.RecurrenceType on ubrs.RecurrenceType equals rt
-                                   where ub.User.Id == userId
-                                   select new UserBillDetail
-                                   {
-                                       UserId = userId,
-                                       Bill = bill,
-                                       BillId = bill.Id,
-                                       BillName = bill.Name,
-                                       Amount = bill.Amount,
-                                       Month = ub.Month,
-                                       Year = ub.Year,
-                                       IsComplete = bill.IsComplete,
-                                       IsAutoPaid = bill.IsAutoPaid,
-                                       RecurrenceTypeName = rt.Name,
-                                       RecurrenceTypeId = ubrs.RecurrenceTypeId,
-                                       Schedule = ubrs.Schedule
-                                   }
-                                                    ).ToList();
+            var userBillDetails = await (from ub in _context.UserBills
+                                         join bill in _context.Bills on ub.Bill equals bill
+                                         join ubrs in _context.UserBillRecurrenceSchedule on ub.RecurrenceSchedule equals ubrs
+                                         join rt in _context.RecurrenceType on ubrs.RecurrenceType equals rt
+                                         where ub.User.Id == userId
+                                         select new UserBillDetail
+                                         {
+                                             UserId = userId,
+                                             Bill = bill,
+                                             BillId = bill.Id,
+                                             BillName = bill.Name,
+                                             Amount = bill.Amount,
+                                             Month = ub.Month,
+                                             Year = ub.Year,
+                                             IsComplete = bill.IsComplete,
+                                             IsAutoPaid = bill.IsAutoPaid,
+                                             RecurrenceTypeName = rt.Name,
+                                             RecurrenceTypeId = ubrs.RecurrenceTypeId,
+                                             Schedule = ubrs.Schedule
+                                         }).ToListAsync();
 
             var filteredList = userBillDetails.GroupBy(x => x.BillId)
-                                                .Select(grp => grp.First())
-                                                .ToList();
+                                              .Select(grp => grp.First())
+                                              .ToList();
 
-            ubs = new UserBillSet()
+            return new UserBillSet
             {
                 UserId = userId,
                 BillDetails = filteredList
             };
-
-
-            return ubs;
         }
 
         /// <summary>
@@ -91,8 +85,8 @@ namespace MyBills.Data.Repositories
         /// <param name="bill">The bill model</param>
         /// <param name="model">The recurrence model</param>
         /// <param name="recurrenceSchedule">The recurrence schedule</param>
-        public void CreateNewUserBill(int userId, Bill bill, IRecurrenceModel model, RecurrenceSchedule recurrenceSchedule)
-        {            
+        public async Task CreateNewUserBillAsync(int userId, Bill bill, IRecurrenceModel model, RecurrenceSchedule recurrenceSchedule)
+        {
             var billDetail = new UserBillDetail
             {
                 UserId = userId,
@@ -105,9 +99,9 @@ namespace MyBills.Data.Repositories
                 RecurrenceScheduleId = recurrenceSchedule.Id
             };
 
-            CreateUserBills(_context, model, billDetail);
+            await CreateUserBillsAsync(_context, model, billDetail);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -117,15 +111,13 @@ namespace MyBills.Data.Repositories
         /// <param name="month">The month</param>
         /// <param name="year">The year</param>
         /// <returns></returns>
-        public List<UserBill> GetBillsByUserIdAndMonthYear(int userId, int month, int year)
+        public async Task<List<UserBill>> GetBillsByUserIdAndMonthYearAsync(int userId, int month, int year)
         {
-            List<UserBill> userBills= _context.UserBills
-                                        .Include(x => x.Bill)
-                                        .Where(x => x.UserId == userId && x.Month == month && x.Year == year && x.Bill.IsComplete == false)
-                                        .OrderBy(x => x.Day)
-                                        .ToList();
-
-            return userBills;
+            return await _context.UserBills
+                .Include(x => x.Bill)
+                .Where(x => x.UserId == userId && x.Month == month && x.Year == year && x.Bill.IsComplete == false)
+                .OrderBy(x => x.Day)
+                .ToListAsync();
         }
 
         /// <summary>
@@ -135,37 +127,32 @@ namespace MyBills.Data.Repositories
         /// <param name="month">The month</param>
         /// <param name="year">The year</param>
         /// <returns></returns>
-        public List<UserBill> GenerateRecurringBills(int userId, int month, int year)
+        public async Task<List<UserBill>> GenerateRecurringBillsAsync(int userId, int month, int year)
         {
-            List<UserBillDetail> userBillDetails;
-            //Get bills by user
-            userBillDetails = (from ub in _context.UserBills
-                               join bill in _context.Bills on ub.Bill equals bill
-                               join ubrs in _context.UserBillRecurrenceSchedule on ub.RecurrenceSchedule equals ubrs
-                               join rt in _context.RecurrenceType on ubrs.RecurrenceType equals rt
-                               where ub.User.Id == userId && !bill.IsComplete
-                               select new UserBillDetail
-                               {
-                                   UserId = userId,
-                                   BillId = bill.Id,
-                                   Month = month,
-                                   Year = year,
-                                   RecurrenceTypeName = rt.Name,
-                                   RecurrenceTypeId = ubrs.RecurrenceTypeId,
-                                   Schedule = ubrs.Schedule,
-                                   RecurrenceScheduleId = ub.RecurrenceScheduleId
-                               }).Distinct().ToList();
+            var userBillDetails = await (from ub in _context.UserBills
+                                         join bill in _context.Bills on ub.Bill equals bill
+                                         join ubrs in _context.UserBillRecurrenceSchedule on ub.RecurrenceSchedule equals ubrs
+                                         join rt in _context.RecurrenceType on ubrs.RecurrenceType equals rt
+                                         where ub.User.Id == userId && !bill.IsComplete
+                                         select new UserBillDetail
+                                         {
+                                             UserId = userId,
+                                             BillId = bill.Id,
+                                             Month = month,
+                                             Year = year,
+                                             RecurrenceTypeName = rt.Name,
+                                             RecurrenceTypeId = ubrs.RecurrenceTypeId,
+                                             Schedule = ubrs.Schedule,
+                                             RecurrenceScheduleId = ub.RecurrenceScheduleId
+                                         }).Distinct().ToListAsync();
 
-            //Add new user bill with user and bill for the month and year
             foreach (var billDetail in userBillDetails)
             {
                 var recModel = GetRecurrenceModel(billDetail.RecurrenceTypeName, billDetail.Schedule);
-
-                CreateNewUserBill(billDetail, recModel);
+                await CreateNewUserBillAsync(billDetail, recModel);
             }
 
-            var userBills = GetBillsByUserIdAndMonthYear(userId, month, year);
-            return userBills;
+            return await GetBillsByUserIdAndMonthYearAsync(userId, month, year);
         }
 
         /// <summary>
@@ -197,10 +184,10 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="billDetail">The <see cref="UserBillDetail"/></param>
         /// <param name="recModel">The recurrence model</param>
-        private void CreateNewUserBill(UserBillDetail billDetail, IRecurrenceModel recModel)
-        {            
-            CreateUserBills(_context, recModel, billDetail);
-            _context.SaveChanges();
+        private async Task CreateNewUserBillAsync(UserBillDetail billDetail, IRecurrenceModel recModel)
+        {
+            await CreateUserBillsAsync(_context, recModel, billDetail);
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -209,12 +196,12 @@ namespace MyBills.Data.Repositories
         /// <param name="_context">The database context</param>
         /// <param name="recModel">The recurrence model</param>
         /// <param name="billDetail">The <see cref="UserBillDetail"/></param>
-        private static void CreateUserBills(MyBillsContext _context, IRecurrenceModel recModel, UserBillDetail billDetail)
+        private static async Task CreateUserBillsAsync(MyBillsContext _context, IRecurrenceModel recModel, UserBillDetail billDetail)
         {
             switch (recModel.Name)
             {
                 case "Daily":
-                    CreateDailyRecurrenceUserBills(_context, billDetail);
+                    await CreateDailyRecurrenceUserBillsAsync(_context, billDetail);
                     break;
 
                 case "Weekly":
@@ -242,7 +229,7 @@ namespace MyBills.Data.Repositories
                     CreateYearlyRecurrenceUserBills(_context, recModel, billDetail);
                     break;
                 case "OneTime":
-                    CreateOneTimeRecurrenceUserBills(_context, recModel, billDetail);
+                    await CreateOneTimeRecurrenceUserBillsAsync(_context, recModel, billDetail);
                     break;
             }
         }
@@ -253,7 +240,7 @@ namespace MyBills.Data.Repositories
         /// <param name="_context">The database context</param>
         /// <param name="model">The recurrence model</param>
         /// <param name="billDetail">The bill detail</param>
-        private static void CreateOneTimeRecurrenceUserBills(MyBillsContext _context, IRecurrenceModel model, UserBillDetail billDetail)
+        private static async Task CreateOneTimeRecurrenceUserBillsAsync(MyBillsContext _context, IRecurrenceModel model, UserBillDetail billDetail)
         {
             var yearlyRecurrenceRec = (OnetimeRecurrence)model;
             var month = yearlyRecurrenceRec.DueDate.Month;
@@ -264,11 +251,11 @@ namespace MyBills.Data.Repositories
             var dueDate = (yearlyRecurrenceRec.DueDate.Day > lastDayOfMonth) ? lastDayOfMonth : yearlyRecurrenceRec.DueDate.Day;
 
             // Does user bill already exist?
-            var userBill = (from b in _context.Bills
-                            join ub in _context.UserBills on b equals ub.Bill
-                            where ub.UserId == billDetail.UserId && ub.BillId == billDetail.BillId && ub.Day == dueDate
-                             && ub.Month == month && ub.Year == year
-                            select ub).SingleOrDefault();
+            var userBill = await (from b in _context.Bills
+                                  join ub in _context.UserBills on b equals ub.Bill
+                                  where ub.UserId == billDetail.UserId && ub.BillId == billDetail.BillId && ub.Day == dueDate
+                                   && ub.Month == month && ub.Year == year
+                                  select ub).SingleOrDefaultAsync();
 
             if (userBill != null)
                 return;
@@ -600,19 +587,18 @@ namespace MyBills.Data.Repositories
         /// <param name="_context">The database context</param>
         /// <param name="model">The recurrence model</param>
         /// <param name="billDetail">The bill detail</param>
-        private static void CreateDailyRecurrenceUserBills(MyBillsContext _context, UserBillDetail billDetail)
+        private static async Task CreateDailyRecurrenceUserBillsAsync(MyBillsContext _context, UserBillDetail billDetail)
         {
             for (var i = billDetail.Month; i <= 12; i++)
             {
                 var lastDayOfMonth = DateTime.DaysInMonth(billDetail.Year, i);
 
-                // Does user bill already exist?
-                var userBill = (from ub in _context.UserBills
-                                where ub.UserId == billDetail.UserId
-                                 && ub.BillId == billDetail.BillId
-                                 && ub.Month == i
-                                 && ub.Year == billDetail.Year
-                                select ub).ToList();
+                var userBill = await (from ub in _context.UserBills
+                                      where ub.UserId == billDetail.UserId
+                                       && ub.BillId == billDetail.BillId
+                                       && ub.Month == i
+                                       && ub.Year == billDetail.Year
+                                      select ub).ToListAsync();
 
                 for (var j = 1; j <= lastDayOfMonth; j++)
                 {

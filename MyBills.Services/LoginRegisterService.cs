@@ -1,6 +1,7 @@
 ﻿using MyBills.Core;
 using MyBills.Domain.Interfaces;
 using System;
+using System.Threading.Tasks;
 
 namespace MyBills.Services
 {
@@ -22,12 +23,12 @@ namespace MyBills.Services
         /// <param name="username">The username</param>
         /// <param name="password">The password</param>
         /// <returns></returns>
-        public bool Login(string username, string password)
+        public async Task<bool> LoginAsync(string username, string password)
         {
             try
             {
-                var isSuccess = _userRepository.FindUserByUsername(username);
-                if (isSuccess) return _userRepository.AuthenticateUser(username, password);
+                var isSuccess = await _userRepository.FindUserByUsernameAsync(username);
+                if (isSuccess) return await _userRepository.AuthenticateUserAsync(username, password);
             }
             catch (Exception ex)
             {
@@ -45,12 +46,12 @@ namespace MyBills.Services
         /// <param name="password">The password</param>
         /// <param name="friendlyName">The friendly name of the user</param>
         /// <returns></returns>
-        public bool RegisterNewUser(string email, string password, string friendlyName)
+        public async Task<bool> RegisterNewUserAsync(string email, string password, string friendlyName)
         {
             try
             {
-                var isSuccess = _userRepository.RegisterNewUser(email, password, friendlyName);
-                if (isSuccess) return _userRepository.AuthenticateUser(email, password);
+                var isSuccess = await _userRepository.RegisterNewUserAsync(email, password, friendlyName);
+                if (isSuccess) return await _userRepository.AuthenticateUserAsync(email, password);
             }
             catch (Exception ex)
             {

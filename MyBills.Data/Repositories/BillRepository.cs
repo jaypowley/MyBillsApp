@@ -1,6 +1,7 @@
 ﻿using MyBills.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyBills.Data.Contexts;
 using MyBills.Domain.Entities;
@@ -24,13 +25,13 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="userId">The user id</param>
         /// <returns></returns>
-        public List<Bill> GetUserBills(int userId)
+        public async Task<List<Bill>> GetUserBillsAsync(int userId)
         {
             List<Bill> filteredList;
-            var bills = (from ub in _context.UserBills
-                         join bill in _context.Bills on ub.Bill equals bill
-                         where ub.User.Id == userId
-                         select bill).ToList();
+            var bills = await (from ub in _context.UserBills
+                               join bill in _context.Bills on ub.Bill equals bill
+                               where ub.User.Id == userId
+                               select bill).ToListAsync();
 
             //Filter out dupes
             filteredList = bills.GroupBy(x => x.Id)
@@ -46,14 +47,14 @@ namespace MyBills.Data.Repositories
         /// <param name="userId">The user id</param>
         /// <param name="billId">The bill id</param>
         /// <returns></returns>
-        public Bill GetUserBillByBillId(int userId, int billId)
+        public async Task<Bill> GetUserBillByBillIdAsync(int userId, int billId)
         {
             List<Bill> filteredList;
-            var bills = (from ub in _context.UserBills
-                         join userBill in _context.Bills on ub.Bill equals userBill
-                         join user in _context.Users on ub.User.Id equals userId
-                         where ub.Bill.Id == billId
-                         select userBill).ToList();
+            var bills = await (from ub in _context.UserBills
+                               join userBill in _context.Bills on ub.Bill equals userBill
+                               join user in _context.Users on ub.User.Id equals userId
+                               where ub.Bill.Id == billId
+                               select userBill).ToListAsync();
 
             //Filter out dupes
             filteredList = bills.GroupBy(x => x.Id)
@@ -68,7 +69,7 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="bill">The new bill to create</param>
         /// <returns></returns>
-        public Bill CreateNewBill(Bill bill)
+        public async Task<Bill> CreateNewBillAsync(Bill bill)
         {            
             var newBill = new Bill
             {
@@ -80,7 +81,7 @@ namespace MyBills.Data.Repositories
 
             _context.Bills.Add(newBill);
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return newBill;
         }
@@ -89,10 +90,10 @@ namespace MyBills.Data.Repositories
         /// Updates an existing bill
         /// </summary>
         /// <param name="bill">The bill to update</param>
-        public void UpdateBill(Bill bill)
+        public async Task UpdateBillAsync(Bill bill)
         {            
             _context.Entry(bill).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         /// <summary>
@@ -100,21 +101,21 @@ namespace MyBills.Data.Repositories
         /// </summary>
         /// <param name="userId">The user id</param>
         /// <param name="billId">The bill id</param>
-        public void DeleteUserBillByBillId(int userId, int billId)
+        public async Task DeleteUserBillByBillIdAsync(int userId, int billId)
         {
-            var bill = GetUserBillByBillId(userId, billId);
+            var bill = await GetUserBillByBillIdAsync(userId, billId);
             if (bill == null) return;
             
-            var userBill = _context.UserBills.FirstOrDefault(x => x.BillId == bill.Id);
+            var userBill = await _context.UserBills.FirstOrDefaultAsync(x => x.BillId == bill.Id);
 
             if (userBill == null) return;
 
             var userBillRecurrenceScheduleId = userBill.RecurrenceScheduleId;
-            _context.UserBills.RemoveRange(_context.UserBills.Where(x => x.BillId == bill.Id).AsEnumerable());
-            _context.UserBillRecurrenceSchedule.RemoveRange(_context.UserBillRecurrenceSchedule.Where(x => x.Id == userBillRecurrenceScheduleId).AsEnumerable());
+            _context.UserBills.RemoveRange(_context.UserBills.Where(x => x.BillId == bill.Id));
+            _context.UserBillRecurrenceSchedule.RemoveRange(_context.UserBillRecurrenceSchedule.Where(x => x.Id == userBillRecurrenceScheduleId));
             _context.Bills.Attach(bill);
             _context.Bills.Remove(bill);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
     }
