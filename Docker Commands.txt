@@ -1,0 +1,12 @@
+# Build and start containers (web and sql)
+1. docker compose up -d
+
+# copy database back up to sql server
+2. (sudo) docker cp MyBills_Core.bak mybills-sql:/var/opt/mssql/data
+
+# DB Restore to Docker SQL - https://learn.microsoft.com/en-us/sql/linux/tutorial-restore-backup-in-sql-server-container?view=sql-server-ver17&tabs=cli#restore-the-database
+# list out logical file names and paths inside the backup
+3. (sudo) docker exec -it mybills-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${MSSQL_SA_PASSWORD}\" -C -Q 'RESTORE FILELISTONLY FROM DISK = "/var/opt/mssql/data/MyBills_Core.bak"'
+
+# restore the database inside the container
+4. (sudo) docker exec -it mybills-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${MSSQL_SA_PASSWORD}\" -C -Q 'RESTORE DATABASE MyBills_Core FROM DISK = "/var/opt/mssql/data/MyBills_Core.bak" WITH MOVE "MyBills_Core" TO "/var/opt/mssql/data/MyBills_Core.mdf", MOVE "MyBills_Core_Log" TO "/var/opt/mssql/data/MyBills_Core.ldf"'

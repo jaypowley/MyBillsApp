@@ -116,3 +116,4 @@ Desktop.ini
 
 # Local environment variables for Docker Compose
 .env
+/MyBills_Core.bak

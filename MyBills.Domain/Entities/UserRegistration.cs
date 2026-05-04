@@ -4,9 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace MyBills.Domain.Entities
 {
     public class UserRegistration
-    {
-        public string Username { get; set; }
-
+    {        
         [Required, StringLength(50)]
         public string Email { get; set; }
 

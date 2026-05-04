@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using MyBills.Core;
 using MyBills.Data.Contexts;
 using MyBills.Data.Repositories;
 using MyBills.Domain.Interfaces;

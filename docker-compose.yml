@@ -1,6 +1,7 @@
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
+    user: root
     container_name: mybills-sql
     environment:
       ACCEPT_EULA: "Y"
@@ -32,7 +33,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__MyBillsContext: "Server=sqlserver;Database=MyBills_Core;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true"
     ports:
-      - "8080:8080"
+      - "8015:8080"
 
 volumes:
   sqlserver-data:
