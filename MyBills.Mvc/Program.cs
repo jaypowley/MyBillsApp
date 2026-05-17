@@ -23,6 +23,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
+        o.ExpireTimeSpan = TimeSpan.FromHours(2);
+        o.SlidingExpiration = true; 
         o.LoginPath = new PathString("/home/login");
         o.LogoutPath = new PathString("/home/logout");
     });

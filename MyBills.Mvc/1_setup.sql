@@ -85,7 +85,7 @@ GO
 /****** Object:  User [GEEK\Billsuser]    Script Date: 5/2/2026 8:19:22 PM ******/
 USE [master]
 GO
-CREATE LOGIN [BillAppUser] WITH PASSWORD=N'FKbxYDaq0kzomAnQQkRLY85s', DEFAULT_DATABASE=[MyBills_Core], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+CREATE LOGIN [BillAppUser] WITH PASSWORD=N'**********', DEFAULT_DATABASE=[MyBills_Core], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 GO
 use [master];
 GO

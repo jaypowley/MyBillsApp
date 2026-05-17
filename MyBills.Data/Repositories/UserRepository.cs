@@ -27,33 +27,32 @@ namespace MyBills.Data.Repositories
         {
             try
             {
-                string newPass;
-                if (newUser.PasswordHash.Trim() == string.Empty)
-                {
-                    var randomWordPass = await GenerateRandomPasswordAsync();
-                    newPass = Authentication.Compute(randomWordPass);
-                }
-                else
-                {
-                    newPass = newUser.PasswordHash;
-                }
-
-                var user = new User
-                {
-                    Username = newUser.Email,
-                    Email = newUser.Email,
-                    PasswordHash = newPass,
-                    CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
-                };
-
-
-                _context.Entry(newUser).State = EntityState.Unchanged;
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                newUser.Id = user.Id;
+            string newPass;
+            if (newUser.PasswordHash.Trim() == string.Empty)
+            {
+                var randomWordPass = await GenerateRandomPasswordAsync();
+                newPass = Authentication.Compute(randomWordPass);
             }
+            else
+            {
+                newPass = newUser.PasswordHash;
+            }
+
+            var user = new User
+            {
+                Username = newUser.Email,
+                Email = newUser.Email,
+                PasswordHash = newPass,
+                CreatedDate = DateTime.Now,
+                UpdatedDate = DateTime.Now,
+            };
+
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            newUser.Id = user.Id;
+        }
             catch (Exception ex)
             {
                 //TODO: Log the exception
@@ -140,6 +139,12 @@ namespace MyBills.Data.Repositories
             try
             {
                 await CreateUserAsync(user);
+
+                if (user.Id <= 0)
+                {
+                    return false;
+                }
+
                 await AddDetailsToUserAsync(user, friendlyName);
             }
             catch (Exception ex)
@@ -162,16 +167,15 @@ namespace MyBills.Data.Repositories
         {
             try
             {
-                var userAccount = await _context.Users.SingleAsync(x => x.Id == user.Id);
-                var ud = new UserDetail
-                {
-                    User = userAccount,
-                    FirstName = friendlyName
-                };
+            var ud = new UserDetail
+            {
+                UserId = user.Id,
+                FirstName = friendlyName
+            };
 
-                _context.UserDetails.Add(ud);
-                await _context.SaveChangesAsync();
-            }
+            _context.UserDetails.Add(ud);
+            await _context.SaveChangesAsync();
+        }
             catch (Exception ex)
             {
                 //TODO: Log the exception

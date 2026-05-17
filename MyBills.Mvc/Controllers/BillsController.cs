@@ -1,10 +1,9 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyBills.Domain.Entities;
 using MyBills.Mvc.Models;
 using MyBills.Services;
+using System.Security.Claims;
 
 namespace MyBills.Mvc.Controllers
 {
